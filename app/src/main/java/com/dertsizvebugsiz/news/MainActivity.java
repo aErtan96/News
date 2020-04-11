@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Log.d("DEBUG","Oelley oldu");
+        Log.d("DEBUG","Deneme Değiş");
 
         createBottomTabBarAndViwPager();
 
