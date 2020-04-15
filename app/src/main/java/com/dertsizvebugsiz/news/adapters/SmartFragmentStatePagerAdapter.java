@@ -1,4 +1,4 @@
-package com.dertsizvebugsiz.news;
+package com.dertsizvebugsiz.news.adapters;
 
 import android.util.SparseArray;
 import android.view.ViewGroup;

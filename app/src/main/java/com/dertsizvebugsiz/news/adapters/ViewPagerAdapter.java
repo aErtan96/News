@@ -1,4 +1,6 @@
-package com.dertsizvebugsiz.news;
+package com.dertsizvebugsiz.news.adapters;
+
+import com.dertsizvebugsiz.news.fragments.TestFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,7 +8,7 @@ import java.util.List;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
-class ViewPagerAdapter extends SmartFragmentStatePagerAdapter {
+public class ViewPagerAdapter extends SmartFragmentStatePagerAdapter {
 
     private final List<Fragment> mList = new ArrayList<>();
 

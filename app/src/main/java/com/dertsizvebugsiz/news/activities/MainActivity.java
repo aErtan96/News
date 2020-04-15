@@ -1,11 +1,14 @@
-package com.dertsizvebugsiz.news;
+package com.dertsizvebugsiz.news.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.viewpager.widget.ViewPager;
 import devlight.io.library.ntb.NavigationTabBar;
 
 import android.os.Bundle;
-import android.util.Log;
+
+import com.dertsizvebugsiz.news.R;
+import com.dertsizvebugsiz.news.adapters.ViewPagerAdapter;
 
 import java.util.ArrayList;
 
@@ -16,14 +19,21 @@ public class MainActivity extends AppCompatActivity {
     ViewPager viewPager;
     ViewPagerAdapter adapter;
 
+    Toolbar toolbar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Log.d("DEBUG","Deneme Değiş");
 
         createBottomTabBarAndViwPager();
+
+        toolbar = findViewById(R.id.tool_bar);
+        toolbar.setTitle("News Feed");
+        toolbar.setTitleTextColor(getResources().getColor(R.color.white));
+        setSupportActionBar(toolbar);
+
 
     }
 
@@ -43,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
                 new NavigationTabBar.Model.Builder(
                         getResources().getDrawable(R.drawable.ic_whatshot_white_24dp),
                         getResources().getColor(R.color.colorPrimaryDark)
-                ).title("Page 4")
+                ).title("News Feed")
                         .badgeTitle("NTB")
                         .build()
         );
@@ -51,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
                 new NavigationTabBar.Model.Builder(
                         getResources().getDrawable(R.drawable.ic_whatshot_white_24dp),
                         getResources().getColor(R.color.colorPrimaryDark)
-                ).title("Page 5")
+                ).title("Currencies")
                         .badgeTitle("with")
                         .build()
         );
@@ -59,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
                 new NavigationTabBar.Model.Builder(
                         getResources().getDrawable(R.drawable.ic_whatshot_white_24dp),
                         getResources().getColor(R.color.colorPrimaryDark)
-                ).title("Page 6")
+                ).title("Archive")
                         .badgeTitle("state")
                         .build()
         );
@@ -67,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
                 new NavigationTabBar.Model.Builder(
                         getResources().getDrawable(R.drawable.ic_whatshot_white_24dp),
                         getResources().getColor(R.color.colorPrimaryDark)
-                ).title("Page 7")
+                ).title("Settings")
                         .badgeTitle("icon")
                         .build()
         );
