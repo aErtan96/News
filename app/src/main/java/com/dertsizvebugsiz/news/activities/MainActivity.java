@@ -28,13 +28,16 @@ public class MainActivity extends AppCompatActivity {
 
 
         createBottomTabBarAndViwPager();
+        setUpToolbar();
 
+
+    }
+
+    public void setUpToolbar(){
         toolbar = findViewById(R.id.tool_bar);
         toolbar.setTitle("News Feed");
         toolbar.setTitleTextColor(getResources().getColor(R.color.white));
         setSupportActionBar(toolbar);
-
-
     }
 
     public void createBottomTabBarAndViwPager(){

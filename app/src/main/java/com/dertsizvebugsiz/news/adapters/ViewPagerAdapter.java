@@ -1,5 +1,6 @@
 package com.dertsizvebugsiz.news.adapters;
 
+import com.dertsizvebugsiz.news.fragments.RecentNewsFragment;
 import com.dertsizvebugsiz.news.fragments.TestFragment;
 
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ public class ViewPagerAdapter extends SmartFragmentStatePagerAdapter {
     public Fragment getItem(int i) {
         switch(i){
             case 0:
-                return TestFragment.newInstance(i);
+                return RecentNewsFragment.newInstance();
             case 1:
                 return TestFragment.newInstance(i);
             case 2:
