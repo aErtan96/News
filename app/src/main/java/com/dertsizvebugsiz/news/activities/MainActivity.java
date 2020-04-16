@@ -7,14 +7,28 @@ import devlight.io.library.ntb.NavigationTabBar;
 
 import android.os.Bundle;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.dertsizvebugsiz.news.R;
 import com.dertsizvebugsiz.news.adapters.ViewPagerAdapter;
+import com.dertsizvebugsiz.news.dataclasses.Currency;
 import com.dertsizvebugsiz.news.dataclasses.News;
+import com.dertsizvebugsiz.news.fragments.CurrenciesFragment;
 import com.dertsizvebugsiz.news.fragments.RecentNewsFragment;
+import com.dertsizvebugsiz.news.parser.JSONParser;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+
+import static com.dertsizvebugsiz.news.AppConstants.COINS_API_URL;
+import static com.dertsizvebugsiz.news.AppConstants.CURRENCY_REQUEST_TAG;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -24,16 +38,17 @@ public class MainActivity extends AppCompatActivity {
     ViewPagerAdapter fragmentAdapter;
 
     Toolbar toolbar;
+    RequestQueue queue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         createBottomTabBarAndViwPager();
         setUpToolbar();
 
+        queue = Volley.newRequestQueue(this);
 
     }
 
@@ -124,6 +139,26 @@ public class MainActivity extends AppCompatActivity {
                 Arrays.asList(news)
         );
         recentNewsFragment.recentNewsAdapter.notifyItemRangeInserted(recentNewsFragment.recentNewsAdapter.news.size() - news.length, news.length);
+    }
+
+    public void loadCurrencyData(){
+        JsonObjectRequest currencyRequest = new JsonObjectRequest(COINS_API_URL, null,
+        new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                Currency[] currencies = JSONParser.parseCurrencyApiResponse(response);
+                ((CurrenciesFragment) fragmentAdapter.getRegisteredFragment(1)).bindData(currencies);
+            }
+        },
+        new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+        currencyRequest.setTag(CURRENCY_REQUEST_TAG);
+        queue.cancelAll(CURRENCY_REQUEST_TAG);
+        queue.add(currencyRequest);
     }
 
 
