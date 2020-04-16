@@ -9,15 +9,19 @@ import android.os.Bundle;
 
 import com.dertsizvebugsiz.news.R;
 import com.dertsizvebugsiz.news.adapters.ViewPagerAdapter;
+import com.dertsizvebugsiz.news.dataclasses.News;
+import com.dertsizvebugsiz.news.fragments.RecentNewsFragment;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
 
     NavigationTabBar navigationTabBar;
     ViewPager viewPager;
-    ViewPagerAdapter adapter;
+    ViewPagerAdapter fragmentAdapter;
 
     Toolbar toolbar;
 
@@ -35,34 +39,34 @@ public class MainActivity extends AppCompatActivity {
 
     public void setUpToolbar(){
         toolbar = findViewById(R.id.tool_bar);
-        toolbar.setTitle("News Feed");
+        toolbar.setTitle("Recent News");
         toolbar.setTitleTextColor(getResources().getColor(R.color.white));
         setSupportActionBar(toolbar);
     }
 
     public void createBottomTabBarAndViwPager(){
 
-        adapter = new ViewPagerAdapter(getSupportFragmentManager());
+        fragmentAdapter = new ViewPagerAdapter(getSupportFragmentManager());
 
         viewPager = findViewById(R.id.fragmentsViewPager);
 
-        viewPager.setAdapter(adapter);
-        viewPager.setCurrentItem(1);
+        viewPager.setAdapter(fragmentAdapter);
+        viewPager.setCurrentItem(0);
         viewPager.setOffscreenPageLimit(3);
 
         navigationTabBar = findViewById(R.id.ntb);
         final ArrayList<NavigationTabBar.Model> models = new ArrayList<>();
         models.add(
                 new NavigationTabBar.Model.Builder(
-                        getResources().getDrawable(R.drawable.ic_whatshot_white_24dp),
+                        getResources().getDrawable(R.drawable.ic_view_headline_white_24dp),
                         getResources().getColor(R.color.colorPrimaryDark)
-                ).title("News Feed")
+                ).title("News")
                         .badgeTitle("NTB")
                         .build()
         );
         models.add(
                 new NavigationTabBar.Model.Builder(
-                        getResources().getDrawable(R.drawable.ic_whatshot_white_24dp),
+                        getResources().getDrawable(R.drawable.ic_monetization_white_24dp),
                         getResources().getColor(R.color.colorPrimaryDark)
                 ).title("Currencies")
                         .badgeTitle("with")
@@ -70,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
         );
         models.add(
                 new NavigationTabBar.Model.Builder(
-                        getResources().getDrawable(R.drawable.ic_whatshot_white_24dp),
+                        getResources().getDrawable(R.drawable.ic_collections_bookmark_white_24dp),
                         getResources().getColor(R.color.colorPrimaryDark)
                 ).title("Archive")
                         .badgeTitle("state")
@@ -78,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
         );
         models.add(
                 new NavigationTabBar.Model.Builder(
-                        getResources().getDrawable(R.drawable.ic_whatshot_white_24dp),
+                        getResources().getDrawable(R.drawable.ic_settings_applications_white_24dp),
                         getResources().getColor(R.color.colorPrimaryDark)
                 ).title("Settings")
                         .badgeTitle("icon")
@@ -103,5 +107,24 @@ public class MainActivity extends AppCompatActivity {
         navigationTabBar.setViewPager(viewPager);
 
     }
+
+
+
+    public void loadMoreIntoRecentNews(){
+        RecentNewsFragment recentNewsFragment = ((RecentNewsFragment)fragmentAdapter.getRegisteredFragment(0));
+        News[] news = new News[]{
+                new News("News 1","",new Date(),1),
+                new News("News 2","",new Date(),1),
+                new News("News 3","",new Date(),1),
+                new News("News 4","",new Date(),1),
+                new News("News 5","",new Date(),1),
+                new News("News 5","",new Date(),1),
+        };
+        recentNewsFragment.recentNewsAdapter.news.addAll(
+                Arrays.asList(news)
+        );
+        recentNewsFragment.recentNewsAdapter.notifyItemRangeInserted(recentNewsFragment.recentNewsAdapter.news.size() - news.length, news.length);
+    }
+
 
 }

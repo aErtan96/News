@@ -1,9 +1,10 @@
-package com.dertsizvebugsiz.news.data;
+package com.dertsizvebugsiz.news.dataclasses;
 
 import java.util.Date;
 
 public class News {
 
+    public int newsId;
     public String title;
     public String body;
     public Date date;
