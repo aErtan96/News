@@ -44,4 +44,10 @@
         app:ntb_title_size="10sp"
         app:ntb_titled="true" />
 
+    <fragment
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:name="com.dertsizvebugsiz.news.fragments.ArticleFragment"
+        android:id="@+id/fragment_article"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

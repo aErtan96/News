@@ -39,8 +39,8 @@
 
         <ImageView
             android:id="@+id/recent_news_item_bookmark"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:src="@drawable/ic_bookmark_border_empty_24dp"
             android:tint="@color/cardview_dark_background"
             app:layout_constraintEnd_toEndOf="parent"
