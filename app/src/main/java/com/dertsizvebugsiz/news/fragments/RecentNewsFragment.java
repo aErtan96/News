@@ -50,24 +50,24 @@ public class RecentNewsFragment extends Fragment {
     private void initRecycler(){
 
         News[] news = new News[]{
-                new News("News 1","",new Date(),1),
-                new News("News 2","",new Date(),1),
-                new News("News 3","",new Date(),1),
-                new News("News 4","",new Date(),1),
-                new News("News 5","",new Date(),1),
-                new News("News 6","",new Date(),1),
-                new News("News 1","",new Date(),1),
-                new News("News 2","",new Date(),1),
-                new News("News 3","",new Date(),1),
-                new News("News 4","",new Date(),1),
-                new News("News 5","",new Date(),1),
-                new News("News 6","",new Date(),1),
-                new News("News 1","",new Date(),1),
-                new News("News 2","",new Date(),1),
-                new News("News 3","",new Date(),1),
-                new News("News 4","",new Date(),1),
-                new News("News 5","",new Date(),1),
-                new News("News 6","",new Date(),1)
+                new News("News 1","","new Date()",1),
+                new News("News 2","","new Date()",1),
+                new News("News 3","","new Date()",1),
+                new News("News 4","","new Date()",1),
+                new News("News 5","","new Date()",1),
+                new News("News 6","","new Date()",1),
+                new News("News 1","","new Date()",1),
+                new News("News 2","","new Date()",1),
+                new News("News 3","","new Date()",1),
+                new News("News 4","","new Date()",1),
+                new News("News 5","","new Date()",1),
+                new News("News 6","","new Date()",1),
+                new News("News 1","","new Date()",1),
+                new News("News 2","","new Date()",1),
+                new News("News 3","","new Date()",1),
+                new News("News 4","","new Date()",1),
+                new News("News 5","","new Date()",1),
+                new News("Last Item","","new Date()",1)
         };
         ArrayList arrayList = new ArrayList<>(Arrays.asList(news));
         recentNewsAdapter = new RecentNewsAdapter(arrayList, ((MainActivity)getActivity()), getActivity().getLayoutInflater());

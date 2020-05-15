@@ -4,15 +4,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.viewpager.widget.ViewPager;
 import devlight.io.library.ntb.NavigationTabBar;
-
 import android.os.Bundle;
+import android.util.Log;
 
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.dertsizvebugsiz.news.AppConstants;
 import com.dertsizvebugsiz.news.R;
 import com.dertsizvebugsiz.news.adapters.ViewPagerAdapter;
 import com.dertsizvebugsiz.news.dataclasses.Currency;
@@ -21,14 +22,14 @@ import com.dertsizvebugsiz.news.fragments.CurrenciesFragment;
 import com.dertsizvebugsiz.news.fragments.RecentNewsFragment;
 import com.dertsizvebugsiz.news.parser.JSONParser;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 
 import static com.dertsizvebugsiz.news.AppConstants.COINS_API_URL;
 import static com.dertsizvebugsiz.news.AppConstants.CURRENCY_REQUEST_TAG;
+import static com.dertsizvebugsiz.news.AppConstants.NEWS_FEED_REQUEST_TAG;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -40,6 +41,9 @@ public class MainActivity extends AppCompatActivity {
     Toolbar toolbar;
     RequestQueue queue;
 
+    private int newsFeedLimit = 15;
+    private int newsFeedLastOffset = -newsFeedLimit;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,12 +53,13 @@ public class MainActivity extends AppCompatActivity {
         setUpToolbar();
 
         queue = Volley.newRequestQueue(this);
+        newsFeedLastOffset = 0;
 
     }
 
     public void setUpToolbar(){
         toolbar = findViewById(R.id.tool_bar);
-        toolbar.setTitle("Recent News");
+        toolbar.setTitle("Currencies");
         toolbar.setTitleTextColor(getResources().getColor(R.color.white));
         setSupportActionBar(toolbar);
     }
@@ -126,6 +131,28 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void loadMoreIntoRecentNews(){
+        final RecentNewsFragment recentNewsFragment = ((RecentNewsFragment)fragmentAdapter.getRegisteredFragment(0));
+        newsFeedLastOffset += newsFeedLimit;
+        JsonArrayRequest newsFeedRequest = new JsonArrayRequest(AppConstants.getNewsFeedUrl(newsFeedLimit, newsFeedLastOffset),
+            new Response.Listener<JSONArray>() {
+                public void onResponse(JSONArray response) {
+                    News[] newsFeed = JSONParser.parseNewsFeedResponse(response);
+                    recentNewsFragment.recentNewsAdapter.news.addAll(
+                            Arrays.asList(newsFeed)
+                    );
+                    recentNewsFragment.recentNewsAdapter.notifyItemRangeInserted(recentNewsFragment.recentNewsAdapter.news.size() - newsFeed.length, newsFeed.length);
+                }
+            },
+            new Response.ErrorListener() {
+                public void onErrorResponse(VolleyError error) {
+                    Log.e("ERROR","Volley error occur\n" + error.getMessage());
+                }
+            });
+
+        newsFeedRequest.setTag(NEWS_FEED_REQUEST_TAG);
+        queue.cancelAll(NEWS_FEED_REQUEST_TAG);
+        queue.add(newsFeedRequest);
+        /*
         RecentNewsFragment recentNewsFragment = ((RecentNewsFragment)fragmentAdapter.getRegisteredFragment(0));
         News[] news = new News[]{
                 new News("News 1","",new Date(),1),
@@ -139,6 +166,7 @@ public class MainActivity extends AppCompatActivity {
                 Arrays.asList(news)
         );
         recentNewsFragment.recentNewsAdapter.notifyItemRangeInserted(recentNewsFragment.recentNewsAdapter.news.size() - news.length, news.length);
+        */
     }
 
     public void loadCurrencyData(){

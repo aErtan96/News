@@ -68,6 +68,7 @@ public class RecentNewsAdapter extends RecyclerView.Adapter<RecentNewsAdapter.Re
 
         void setData(News news){
             //header.setText(news.title);
+            header.setText(news.title);
             int rand = new Random().nextInt(4);
             int resourceId = R.drawable.logo_coindesk_256px;
             switch (rand){

@@ -44,10 +44,19 @@
         app:ntb_title_size="10sp"
         app:ntb_titled="true" />
 
-    <fragment
+
+    <LinearLayout
+        android:visibility="gone"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:name="com.dertsizvebugsiz.news.fragments.ArticleFragment"
-        android:id="@+id/fragment_article"/>
+        android:layout_height="match_parent">
+
+        <fragment
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:name="com.dertsizvebugsiz.news.fragments.ArticleFragment"
+            android:id="@+id/fragment_article"/>
+
+    </LinearLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
