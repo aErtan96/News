@@ -36,7 +36,7 @@
         app:ntb_bg_color="#dddddd"
         app:ntb_corners_radius="0dp"
         app:ntb_icon_size_fraction="0.5"
-        app:ntb_inactive_color="@color/colorLightBlue"
+        app:ntb_inactive_color="@color/colorPrimaryLight"
         app:ntb_scaled="true"
         app:ntb_swiped="true"
         app:ntb_tinted="true"
@@ -46,6 +46,7 @@
 
 
     <LinearLayout
+        android:id="@+id/article_fragment_container"
         android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -53,6 +54,7 @@
         <fragment
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:tag="article_fragment"
             android:name="com.dertsizvebugsiz.news.fragments.ArticleFragment"
             android:id="@+id/fragment_article"/>
 

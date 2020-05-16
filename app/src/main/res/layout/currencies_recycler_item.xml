@@ -24,8 +24,6 @@
             android:textSize="20sp"
             android:text="BTC"/>
 
-
-        <!-- app:layout_constraintStart_toEndOf="@+id/currencies_item_symbol" -->
         <TextView
             android:id="@+id/currencies_item_price_change"
             app:layout_constraintEnd_toStartOf="@id/currencies_item_price"

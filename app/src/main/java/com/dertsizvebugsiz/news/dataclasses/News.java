@@ -34,4 +34,9 @@ public class News {
         this.siteName = siteName;
         this.link = link;
     }
+
+    public String getPublishDatePart(){
+        return publishDateStr.split(" ")[0];
+    }
+
 }

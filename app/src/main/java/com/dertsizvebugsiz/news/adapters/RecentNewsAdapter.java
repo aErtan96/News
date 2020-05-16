@@ -1,6 +1,5 @@
 package com.dertsizvebugsiz.news.adapters;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +13,10 @@ import com.dertsizvebugsiz.news.dataclasses.News;
 import java.util.ArrayList;
 import java.util.Random;
 
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class RecentNewsAdapter extends RecyclerView.Adapter<RecentNewsAdapter.RecentNewsViewHolder> {
+public class RecentNewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public ArrayList<News> news;
     private MainActivity mainActivity;
@@ -26,34 +26,49 @@ public class RecentNewsAdapter extends RecyclerView.Adapter<RecentNewsAdapter.Re
         this.news = news;
         this.mainActivity = mainActivity;
         this.layoutInflater = layoutInflater;
-
-        Log.d("DEBUG", "CREATE RecentNewsAdapter. News Size -> " + news.size());
     }
 
-    public RecentNewsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = layoutInflater.inflate(R.layout.recent_news_recycler_item, parent,false);
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-        Log.d("DEBUG", "CREATE VIEW HOLDER");
-        return new RecentNewsViewHolder(v);
+        switch (viewType) {
+            case 0:
+                View v0 = layoutInflater.inflate(R.layout.recent_news_recycler_item, parent,false);
+                return new RecentNewsViewHolder(v0);
+            case 1:
+                View v1 = layoutInflater.inflate(R.layout.recent_news_recycler_item_loading, parent,false);
+                return new LoadingViewHolder(v1);
+        }
+
+        return null;
     }
+
+    public int getItemViewType(int position) {
+        if(position < news.size()){
+            return 0;
+        }
+        return 1;
+    }
+
 
     @Override
-    public void onBindViewHolder(RecentNewsViewHolder holder, int position) {
-        holder.setData(news.get(position));
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        if(position < news.size()){
+            ((RecentNewsViewHolder)holder).setData(news.get(position));
+        }
     }
 
 
 
     @Override
     public int getItemCount() {
-        return news.size();
+        return news.size() + 1;
     }
 
-    static class RecentNewsViewHolder extends RecyclerView.ViewHolder{
-
+    class RecentNewsViewHolder extends RecyclerView.ViewHolder{
 
         ImageView icon, bookmark;
-        TextView header;
+        TextView header, datetime;
+        CardView container;
 
         RecentNewsViewHolder(View itemView) {
             super(itemView);
@@ -64,11 +79,13 @@ public class RecentNewsAdapter extends RecyclerView.Adapter<RecentNewsAdapter.Re
             icon = root.findViewById(R.id.recent_news_item_icon);
             bookmark = root.findViewById(R.id.recent_news_item_bookmark);
             header = root.findViewById(R.id.recent_news_item_header);
+            container = root.findViewById(R.id.recent_news_recycler_item_container);
+            datetime = root.findViewById(R.id.recent_news_item_datetime);
         }
 
         void setData(News news){
-            //header.setText(news.title);
             header.setText(news.title);
+            datetime.setText(news.getPublishDatePart());
             int rand = new Random().nextInt(4);
             int resourceId = R.drawable.logo_coindesk_256px;
             switch (rand){
@@ -83,9 +100,19 @@ public class RecentNewsAdapter extends RecyclerView.Adapter<RecentNewsAdapter.Re
                     break;
             }
             Glide.with(icon).load(resourceId).into(icon);
+            container.setOnClickListener(v -> {
+                mainActivity.openArticleFragment(news.newsId);
+            });
+        }
+    }
+
+    static class LoadingViewHolder extends RecyclerView.ViewHolder{
+
+        public LoadingViewHolder(View itemView) {
+            super(itemView);
         }
 
-
     }
+
 
 }

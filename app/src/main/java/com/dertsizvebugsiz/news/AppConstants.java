@@ -10,6 +10,9 @@ public class AppConstants {
     public final static String SINGLE_NEW_REQUEST_TAG = "single_new_request";
     public final static String NEWS_FEED_REQUEST_TAG = "news_feed_request";
 
+
+    public final static String ARTICLE_FRAGMENT_TAG = "article_fragment";
+
     public static String getSingleNewUrl(int newsId){
         return SINGLE_NEW_URL + "id=" + newsId;
     }

@@ -6,7 +6,8 @@ import androidx.viewpager.widget.ViewPager;
 import devlight.io.library.ntb.NavigationTabBar;
 import android.os.Bundle;
 import android.util.Log;
-
+import android.view.View;
+import android.widget.LinearLayout;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -18,18 +19,18 @@ import com.dertsizvebugsiz.news.R;
 import com.dertsizvebugsiz.news.adapters.ViewPagerAdapter;
 import com.dertsizvebugsiz.news.dataclasses.Currency;
 import com.dertsizvebugsiz.news.dataclasses.News;
+import com.dertsizvebugsiz.news.fragments.ArticleFragment;
 import com.dertsizvebugsiz.news.fragments.CurrenciesFragment;
 import com.dertsizvebugsiz.news.fragments.RecentNewsFragment;
 import com.dertsizvebugsiz.news.parser.JSONParser;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Arrays;
-
 import static com.dertsizvebugsiz.news.AppConstants.COINS_API_URL;
 import static com.dertsizvebugsiz.news.AppConstants.CURRENCY_REQUEST_TAG;
 import static com.dertsizvebugsiz.news.AppConstants.NEWS_FEED_REQUEST_TAG;
+import static com.dertsizvebugsiz.news.AppConstants.SINGLE_NEW_REQUEST_TAG;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -44,10 +45,14 @@ public class MainActivity extends AppCompatActivity {
     private int newsFeedLimit = 15;
     private int newsFeedLastOffset = -newsFeedLimit;
 
+    private LinearLayout fragmentContainer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        fragmentContainer = findViewById(R.id.article_fragment_container);
 
         createBottomTabBarAndViwPager();
         setUpToolbar();
@@ -55,6 +60,16 @@ public class MainActivity extends AppCompatActivity {
         queue = Volley.newRequestQueue(this);
         newsFeedLastOffset = 0;
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(fragmentContainer.getVisibility() == View.VISIBLE){
+            closeArticleFragment();
+        }
+        else{
+            super.onBackPressed();
+        }
     }
 
     public void setUpToolbar(){
@@ -73,6 +88,36 @@ public class MainActivity extends AppCompatActivity {
         viewPager.setAdapter(fragmentAdapter);
         viewPager.setCurrentItem(0);
         viewPager.setOffscreenPageLimit(3);
+
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                switch (position){
+                    case 0:
+                        changeTitle("News");
+                        break;
+                    case 1:
+                        changeTitle("Currencies");
+                        break;
+                    case 2:
+                        changeTitle("Archive");
+                        break;
+                    case 3:
+                        changeTitle("Settings");
+                        break;
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
 
         navigationTabBar = findViewById(R.id.ntb);
         final ArrayList<NavigationTabBar.Model> models = new ArrayList<>();
@@ -130,6 +175,39 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+    public void openArticleFragment(int articleId){
+        Log.d("DEBUG", "Open Article Id: " + articleId);
+        fragmentContainer.setVisibility(View.VISIBLE);
+        ArticleFragment articleFragment = ((ArticleFragment) getSupportFragmentManager().findFragmentByTag(AppConstants.ARTICLE_FRAGMENT_TAG));
+
+        articleFragment.makeLoading();
+
+        JsonArrayRequest singleNewsRequest = new JsonArrayRequest(AppConstants.getSingleNewUrl(articleId),
+            response -> {
+                News singlewNews = JSONParser.parseSingleNewsResponse(response);
+                if(singlewNews != null){
+                    articleFragment.setNewsData(singlewNews);
+                }
+                else{
+                    //TODO: O id'ye ait bir kayıt bulunamadı!
+                }
+            },
+            error -> {
+                Log.e("ERROR","Volley error occur\n" + error.getMessage());
+            });
+
+        singleNewsRequest.setTag(SINGLE_NEW_REQUEST_TAG);
+        queue.cancelAll(SINGLE_NEW_REQUEST_TAG);
+        queue.add(singleNewsRequest);
+    }
+
+    public void closeArticleFragment(){
+        queue.cancelAll(SINGLE_NEW_REQUEST_TAG);
+        fragmentContainer.setVisibility(View.GONE);
+    }
+
+
+
     public void loadMoreIntoRecentNews(){
         final RecentNewsFragment recentNewsFragment = ((RecentNewsFragment)fragmentAdapter.getRegisteredFragment(0));
         newsFeedLastOffset += newsFeedLimit;
@@ -137,10 +215,14 @@ public class MainActivity extends AppCompatActivity {
             new Response.Listener<JSONArray>() {
                 public void onResponse(JSONArray response) {
                     News[] newsFeed = JSONParser.parseNewsFeedResponse(response);
-                    recentNewsFragment.recentNewsAdapter.news.addAll(
-                            Arrays.asList(newsFeed)
-                    );
-                    recentNewsFragment.recentNewsAdapter.notifyItemRangeInserted(recentNewsFragment.recentNewsAdapter.news.size() - newsFeed.length, newsFeed.length);
+                    if(recentNewsFragment.recentNewsAdapter.news.size() == 0){
+                        recentNewsFragment.recentNewsAdapter.news.addAll(Arrays.asList(newsFeed));
+                        recentNewsFragment.recentNewsAdapter.notifyDataSetChanged();
+                    }
+                    else{
+                        recentNewsFragment.recentNewsAdapter.news.addAll(Arrays.asList(newsFeed));
+                        recentNewsFragment.recentNewsAdapter.notifyItemRangeInserted(recentNewsFragment.recentNewsAdapter.news.size() - newsFeed.length, newsFeed.length);
+                    }
                 }
             },
             new Response.ErrorListener() {
@@ -152,21 +234,6 @@ public class MainActivity extends AppCompatActivity {
         newsFeedRequest.setTag(NEWS_FEED_REQUEST_TAG);
         queue.cancelAll(NEWS_FEED_REQUEST_TAG);
         queue.add(newsFeedRequest);
-        /*
-        RecentNewsFragment recentNewsFragment = ((RecentNewsFragment)fragmentAdapter.getRegisteredFragment(0));
-        News[] news = new News[]{
-                new News("News 1","",new Date(),1),
-                new News("News 2","",new Date(),1),
-                new News("News 3","",new Date(),1),
-                new News("News 4","",new Date(),1),
-                new News("News 5","",new Date(),1),
-                new News("News 5","",new Date(),1),
-        };
-        recentNewsFragment.recentNewsAdapter.news.addAll(
-                Arrays.asList(news)
-        );
-        recentNewsFragment.recentNewsAdapter.notifyItemRangeInserted(recentNewsFragment.recentNewsAdapter.news.size() - news.length, news.length);
-        */
     }
 
     public void loadCurrencyData(){
@@ -189,5 +256,9 @@ public class MainActivity extends AppCompatActivity {
         queue.add(currencyRequest);
     }
 
+
+    public void changeTitle(String title){
+        toolbar.setTitle(title);
+    }
 
 }
