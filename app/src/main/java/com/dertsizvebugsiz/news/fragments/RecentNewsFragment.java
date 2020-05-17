@@ -5,16 +5,18 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 
 import com.dertsizvebugsiz.news.EndlessRecyclerViewScrollListener;
 import com.dertsizvebugsiz.news.R;
 import com.dertsizvebugsiz.news.activities.MainActivity;
+import com.dertsizvebugsiz.news.adapters.CollectionsAdapter;
 import com.dertsizvebugsiz.news.adapters.RecentNewsAdapter;
 import com.dertsizvebugsiz.news.dataclasses.News;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,8 +24,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class RecentNewsFragment extends Fragment {
 
-    public RecyclerView recyclerView;
+    private LinearLayout recentNewsContainer, collectionsContainer;
+
+    public RecyclerView recentNewsRecyclerView;
     public RecentNewsAdapter recentNewsAdapter;
+
+    public RecyclerView collectionsRecyclerView;
+    public CollectionsAdapter collectionsAdapter;
+
 
     public static RecentNewsFragment newInstance(){
         RecentNewsFragment recentNewsFragment = new RecentNewsFragment();
@@ -35,7 +43,8 @@ public class RecentNewsFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_recent_news, container, false);
 
         getViews(rootView);
-        initRecycler();
+        initRecentNewsRecycler();
+        initCollectionsRecycler();
         registerEventListeners();
 
         Log.d("DEBUG", "ONCREATEVIEW");
@@ -44,26 +53,48 @@ public class RecentNewsFragment extends Fragment {
     }
 
     private void getViews(View root){
-        recyclerView = root.findViewById(R.id.recent_news_recyclerview);
+        recentNewsRecyclerView = root.findViewById(R.id.recent_news_recyclerview);
+        collectionsRecyclerView = root.findViewById(R.id.collections_recyclerview);
+
+        recentNewsContainer = root.findViewById(R.id.recent_news_recyclerview_container);
+        collectionsContainer = root.findViewById(R.id.collections_recyclerview_container);
     }
 
-    private void initRecycler(){
-
+    private void initRecentNewsRecycler(){
         News[] news = new News[]{};
         ArrayList arrayList = new ArrayList<>(Arrays.asList(news));
         recentNewsAdapter = new RecentNewsAdapter(arrayList, ((MainActivity)getActivity()), getActivity().getLayoutInflater());
-        recyclerView.setAdapter(recentNewsAdapter);
+        recentNewsRecyclerView.setAdapter(recentNewsAdapter);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
-        recyclerView.setLayoutManager(linearLayoutManager);
+        recentNewsRecyclerView.setLayoutManager(linearLayoutManager);
+    }
+
+    private void initCollectionsRecycler(){
+        collectionsAdapter = new CollectionsAdapter(((MainActivity) getActivity()), getActivity().getLayoutInflater());
+        collectionsRecyclerView.setAdapter(collectionsAdapter);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
+        collectionsRecyclerView.setLayoutManager(linearLayoutManager);
     }
 
     private void registerEventListeners(){
-        recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener((LinearLayoutManager) recyclerView.getLayoutManager()) {
+        recentNewsRecyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener((LinearLayoutManager) recentNewsRecyclerView.getLayoutManager()) {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
                 ((MainActivity)getActivity()).loadMoreIntoRecentNews();
             }
         });
+    }
+
+    public void openRecentNewsRecycler(){
+        recentNewsContainer.setVisibility(View.VISIBLE);
+        collectionsContainer.setVisibility(View.INVISIBLE);
+        recentNewsAdapter.notifyDataSetChanged();
+    }
+
+    public void openCollectionsRecycler(){
+        recentNewsContainer.setVisibility(View.INVISIBLE);
+        collectionsContainer.setVisibility(View.VISIBLE);
+        collectionsAdapter.notifyDataSetChanged();
     }
 
 }

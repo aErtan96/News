@@ -1,13 +1,22 @@
 package com.dertsizvebugsiz.news.activities;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.viewpager.widget.ViewPager;
 import devlight.io.library.ntb.NavigationTabBar;
+
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
+
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -16,6 +25,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.dertsizvebugsiz.news.AppConstants;
 import com.dertsizvebugsiz.news.R;
+import com.dertsizvebugsiz.news.SqliteConnector;
 import com.dertsizvebugsiz.news.adapters.ViewPagerAdapter;
 import com.dertsizvebugsiz.news.dataclasses.Currency;
 import com.dertsizvebugsiz.news.dataclasses.News;
@@ -27,6 +37,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import static com.dertsizvebugsiz.news.AppConstants.COINS_API_URL;
 import static com.dertsizvebugsiz.news.AppConstants.CURRENCY_REQUEST_TAG;
 import static com.dertsizvebugsiz.news.AppConstants.NEWS_FEED_REQUEST_TAG;
@@ -34,6 +45,7 @@ import static com.dertsizvebugsiz.news.AppConstants.SINGLE_NEW_REQUEST_TAG;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static LinkedHashMap<Integer, News> bookmarks;
 
     NavigationTabBar navigationTabBar;
     ViewPager viewPager;
@@ -43,28 +55,33 @@ public class MainActivity extends AppCompatActivity {
     RequestQueue queue;
 
     private int newsFeedLimit = 15;
-    private int newsFeedLastOffset = -newsFeedLimit;
+    private int newsFeedLastOffset = -15;
 
-    private LinearLayout fragmentContainer;
+    private ConstraintLayout fragmentArticleContainer;
+    private ConstraintLayout articleLoadingIndicator;
+
+    private MenuItem collectionsButton, allNewsButton;
+    private String selectedToolbarButton = "all_news";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        fragmentContainer = findViewById(R.id.article_fragment_container);
+        fragmentArticleContainer = findViewById(R.id.article_fragment_container);
+        articleLoadingIndicator = findViewById(R.id.article_loading);
 
         createBottomTabBarAndViwPager();
         setUpToolbar();
 
         queue = Volley.newRequestQueue(this);
-        newsFeedLastOffset = 0;
 
     }
 
     @Override
     public void onBackPressed() {
-        if(fragmentContainer.getVisibility() == View.VISIBLE){
+        if(fragmentArticleContainer.getVisibility() == View.VISIBLE){
             closeArticleFragment();
         }
         else{
@@ -72,9 +89,42 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        collectionsButton = menu.findItem(R.id.toolbar_collections_button);
+        allNewsButton = menu.findItem(R.id.toolbar_all_news_button);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.toolbar_collections_button:
+                if(selectedToolbarButton.equals("collections")){
+                    return true;
+                }
+                allNewsButton.setIcon(R.drawable.ic_view_headline_grey_24dp);
+                collectionsButton.setIcon(R.drawable.ic_collections_bookmark_white_24dp);
+                ((RecentNewsFragment)fragmentAdapter.getRegisteredFragment(1)).openCollectionsRecycler();
+                selectedToolbarButton = "collections";
+                break;
+            case R.id.toolbar_all_news_button:
+                if(selectedToolbarButton.equals("all_news")){
+                    return true;
+                }
+                allNewsButton.setIcon(R.drawable.ic_view_headline_white_24dp);
+                collectionsButton.setIcon(R.drawable.ic_collections_bookmark_grey_24dp);
+                ((RecentNewsFragment)fragmentAdapter.getRegisteredFragment(1)).openRecentNewsRecycler();
+                selectedToolbarButton = "all_news";
+                break;
+        }
+        return true;
+    }
+
     public void setUpToolbar(){
         toolbar = findViewById(R.id.tool_bar);
-        toolbar.setTitle("Currencies");
+        toolbar.setTitle("News Feed");
         toolbar.setTitleTextColor(getResources().getColor(R.color.white));
         setSupportActionBar(toolbar);
     }
@@ -86,8 +136,8 @@ public class MainActivity extends AppCompatActivity {
         viewPager = findViewById(R.id.fragmentsViewPager);
 
         viewPager.setAdapter(fragmentAdapter);
-        viewPager.setCurrentItem(0);
         viewPager.setOffscreenPageLimit(3);
+        viewPager.setCurrentItem(1);
 
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -99,15 +149,12 @@ public class MainActivity extends AppCompatActivity {
             public void onPageSelected(int position) {
                 switch (position){
                     case 0:
-                        changeTitle("News");
-                        break;
-                    case 1:
                         changeTitle("Currencies");
                         break;
-                    case 2:
-                        changeTitle("Archive");
+                    case 1:
+                        changeTitle("News Feed");
                         break;
-                    case 3:
+                    case 2:
                         changeTitle("Settings");
                         break;
                 }
@@ -123,14 +170,6 @@ public class MainActivity extends AppCompatActivity {
         final ArrayList<NavigationTabBar.Model> models = new ArrayList<>();
         models.add(
                 new NavigationTabBar.Model.Builder(
-                        getResources().getDrawable(R.drawable.ic_view_headline_white_24dp),
-                        getResources().getColor(R.color.colorPrimaryDark)
-                ).title("News")
-                        .badgeTitle("NTB")
-                        .build()
-        );
-        models.add(
-                new NavigationTabBar.Model.Builder(
                         getResources().getDrawable(R.drawable.ic_monetization_white_24dp),
                         getResources().getColor(R.color.colorPrimaryDark)
                 ).title("Currencies")
@@ -139,10 +178,10 @@ public class MainActivity extends AppCompatActivity {
         );
         models.add(
                 new NavigationTabBar.Model.Builder(
-                        getResources().getDrawable(R.drawable.ic_collections_bookmark_white_24dp),
+                        getResources().getDrawable(R.drawable.ic_view_headline_white_24dp),
                         getResources().getColor(R.color.colorPrimaryDark)
-                ).title("Archive")
-                        .badgeTitle("state")
+                ).title("News")
+                        .badgeTitle("NTB")
                         .build()
         );
         models.add(
@@ -153,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
                         .badgeTitle("icon")
                         .build()
         );
-
+        
         navigationTabBar.setModels(models);
         navigationTabBar.setBehaviorEnabled(true);
 
@@ -173,20 +212,26 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void changeTitle(String title){
+        toolbar.setTitle(title);
+    }
+
 
 
     public void openArticleFragment(int articleId){
         Log.d("DEBUG", "Open Article Id: " + articleId);
-        fragmentContainer.setVisibility(View.VISIBLE);
+        fragmentArticleContainer.setVisibility(View.VISIBLE);
+        articleLoadingIndicator.setVisibility(View.VISIBLE);
         ArticleFragment articleFragment = ((ArticleFragment) getSupportFragmentManager().findFragmentByTag(AppConstants.ARTICLE_FRAGMENT_TAG));
 
         articleFragment.makeLoading();
 
         JsonArrayRequest singleNewsRequest = new JsonArrayRequest(AppConstants.getSingleNewUrl(articleId),
             response -> {
-                News singlewNews = JSONParser.parseSingleNewsResponse(response);
-                if(singlewNews != null){
-                    articleFragment.setNewsData(singlewNews);
+                News singleNews = JSONParser.parseSingleNewsResponse(response);
+                if(singleNews != null){
+                    articleLoadingIndicator.setVisibility(View.INVISIBLE);
+                    articleFragment.setNewsData(singleNews);
                 }
                 else{
                     //TODO: O id'ye ait bir kayıt bulunamadı!
@@ -203,14 +248,36 @@ public class MainActivity extends AppCompatActivity {
 
     public void closeArticleFragment(){
         queue.cancelAll(SINGLE_NEW_REQUEST_TAG);
-        fragmentContainer.setVisibility(View.GONE);
+        fragmentArticleContainer.setVisibility(View.GONE);
+    }
+
+
+
+
+    public LinkedHashMap<Integer, News> getBookmarks(){
+        if(bookmarks == null){
+            bookmarks = SqliteConnector.getInstance(this).getAllBookmarks();
+        }
+        return bookmarks;
+    }
+
+    public void addBookmark(News news){
+        SqliteConnector.getInstance(this).addBookmark(news);
+        bookmarks.put(news.newsId, news);
+    }
+
+    public void deleteBookmark(int newsId) {
+        SqliteConnector.getInstance(this).deleteBookmark(newsId);
+        bookmarks.remove(newsId);
     }
 
 
 
     public void loadMoreIntoRecentNews(){
-        final RecentNewsFragment recentNewsFragment = ((RecentNewsFragment)fragmentAdapter.getRegisteredFragment(0));
+        Log.d("DEBUG","loadMoreIntoRecentNews");
+        final RecentNewsFragment recentNewsFragment = ((RecentNewsFragment)fragmentAdapter.getRegisteredFragment(1));
         newsFeedLastOffset += newsFeedLimit;
+        Log.d("DEBUG", AppConstants.getNewsFeedUrl(newsFeedLimit, newsFeedLastOffset));
         JsonArrayRequest newsFeedRequest = new JsonArrayRequest(AppConstants.getNewsFeedUrl(newsFeedLimit, newsFeedLastOffset),
             new Response.Listener<JSONArray>() {
                 public void onResponse(JSONArray response) {
@@ -242,7 +309,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(JSONObject response) {
                 Currency[] currencies = JSONParser.parseCurrencyApiResponse(response);
-                ((CurrenciesFragment) fragmentAdapter.getRegisteredFragment(1)).bindData(currencies);
+                ((CurrenciesFragment) fragmentAdapter.getRegisteredFragment(0)).bindData(currencies);
             }
         },
         new Response.ErrorListener() {
@@ -257,8 +324,5 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void changeTitle(String title){
-        toolbar.setTitle(title);
-    }
 
 }

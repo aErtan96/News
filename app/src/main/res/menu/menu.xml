@@ -1,4 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <item
+        android:id="@+id/toolbar_collections_button"
+        android:title="collections"
+        android:icon="@drawable/ic_collections_bookmark_grey_24dp"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/toolbar_all_news_button"
+        android:title="all"
+        android:icon="@drawable/ic_view_headline_white_24dp"
+        app:showAsAction="always" />
 
 </menu>

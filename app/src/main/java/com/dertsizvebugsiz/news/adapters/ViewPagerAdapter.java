@@ -21,12 +21,10 @@ public class ViewPagerAdapter extends SmartFragmentStatePagerAdapter {
     public Fragment getItem(int i) {
         switch(i){
             case 0:
-                return RecentNewsFragment.newInstance();
-            case 1:
                 return new CurrenciesFragment();
+            case 1:
+                return RecentNewsFragment.newInstance();
             case 2:
-                return TestFragment.newInstance(i);
-            case 3:
                 return TestFragment.newInstance(i);
             default:
                 return null;
@@ -35,7 +33,7 @@ public class ViewPagerAdapter extends SmartFragmentStatePagerAdapter {
 
     @Override
     public int getCount() {
-        return 4;
+        return 3;
     }
 
 }

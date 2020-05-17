@@ -6,74 +6,48 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.bumptech.glide.Glide;
 import com.dertsizvebugsiz.news.AppConstants;
 import com.dertsizvebugsiz.news.R;
-import com.dertsizvebugsiz.news.SqliteConnector;
 import com.dertsizvebugsiz.news.activities.MainActivity;
 import com.dertsizvebugsiz.news.dataclasses.News;
-import java.util.ArrayList;
-import java.util.Random;
-
+import java.util.Map;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class RecentNewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class CollectionsAdapter extends RecyclerView.Adapter<CollectionsAdapter.CollectionsViewHolder> {
 
-    public ArrayList<News> news;
     private MainActivity mainActivity;
     private LayoutInflater layoutInflater;
 
-    public RecentNewsAdapter(ArrayList<News> news, MainActivity mainActivity, LayoutInflater layoutInflater) {
-        this.news = news;
+    public CollectionsAdapter( MainActivity mainActivity, LayoutInflater layoutInflater) {
         this.mainActivity = mainActivity;
         this.layoutInflater = layoutInflater;
     }
 
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-
-        switch (viewType) {
-            case 0:
-                View v0 = layoutInflater.inflate(R.layout.recent_news_recycler_item, parent,false);
-                return new RecentNewsViewHolder(v0);
-            case 1:
-                View v1 = layoutInflater.inflate(R.layout.recent_news_recycler_item_loading, parent,false);
-                return new LoadingViewHolder(v1);
-        }
-
-        return null;
+    public CollectionsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View v = layoutInflater.inflate(R.layout.recent_news_recycler_item, parent,false);
+        return new CollectionsViewHolder(v);
     }
-
-    public int getItemViewType(int position) {
-        if(position < news.size()){
-            return 0;
-        }
-        return 1;
-    }
-
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if(position < news.size()){
-            ((RecentNewsViewHolder)holder).setData(news.get(position));
-        }
+    public void onBindViewHolder(CollectionsViewHolder holder, int position) {
+        holder.setData(((News)((Map.Entry)mainActivity.getBookmarks().entrySet().toArray()[position]).getValue()));
     }
-
-
 
     @Override
     public int getItemCount() {
-        return news.size() + 1;
+        return mainActivity.getBookmarks().size();
     }
 
-    class RecentNewsViewHolder extends RecyclerView.ViewHolder{
+
+    class CollectionsViewHolder extends RecyclerView.ViewHolder{
 
         ImageView icon, bookmark;
         TextView header, datetime;
         CardView container;
 
-        RecentNewsViewHolder(View itemView) {
+        public CollectionsViewHolder(View itemView) {
             super(itemView);
             getViews(itemView);
         }
@@ -86,7 +60,7 @@ public class RecentNewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             datetime = root.findViewById(R.id.recent_news_item_datetime);
         }
 
-        void setData(News news){
+        public void setData(News news){
             header.setText(news.title);
             datetime.setText(news.getPublishDatePart());
 
@@ -114,12 +88,6 @@ public class RecentNewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         }
     }
 
-    static class LoadingViewHolder extends RecyclerView.ViewHolder{
-        LoadingViewHolder(View itemView) {
-            super(itemView);
-        }
-    }
-
     class BookmarkClickListener implements View.OnClickListener{
 
         boolean isBookmarked;
@@ -143,8 +111,7 @@ public class RecentNewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 v.setOnClickListener(new BookmarkClickListener(true, news));
             }
         }
+
     }
-
-
 
 }
