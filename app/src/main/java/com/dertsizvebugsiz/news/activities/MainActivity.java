@@ -6,17 +6,11 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.viewpager.widget.ViewPager;
 import devlight.io.library.ntb.NavigationTabBar;
-
-import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -192,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
                         .badgeTitle("icon")
                         .build()
         );
-        
+
         navigationTabBar.setModels(models);
         navigationTabBar.setBehaviorEnabled(true);
 

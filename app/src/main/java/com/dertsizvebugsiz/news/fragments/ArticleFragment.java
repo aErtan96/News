@@ -15,7 +15,7 @@ import androidx.fragment.app.Fragment;
 
 public class ArticleFragment extends Fragment {
 
-    TextView articleHeader, articleBody, articleDate;
+    TextView articleHeader, articleBody, articleDate, articleReadFull;
     ImageView articleBack, articleOpenInNew, articleBookmark;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -34,6 +34,7 @@ public class ArticleFragment extends Fragment {
         articleBack = root.findViewById(R.id.article_back);
         articleOpenInNew = root.findViewById(R.id.article_open_in_new);
         articleBookmark = root.findViewById(R.id.article_bookmark);
+        articleReadFull = root.findViewById(R.id.read_full_article);
     }
 
     private void registerEventListeners(){
@@ -49,6 +50,7 @@ public class ArticleFragment extends Fragment {
         articleBody.setText("");
         articleBookmark.setOnClickListener(null);
         articleOpenInNew.setOnClickListener(null);
+        articleReadFull.setOnClickListener(null);
     }
 
     public void setNewsData(News news){
@@ -61,6 +63,10 @@ public class ArticleFragment extends Fragment {
         }
         articleDate.setText(news.getPublishDatePart());
         articleOpenInNew.setOnClickListener(v -> {
+            Intent viewIntent = new Intent("android.intent.action.VIEW", Uri.parse(news.link));
+            startActivity(viewIntent);
+        });
+        articleReadFull.setOnClickListener(v -> {
             Intent viewIntent = new Intent("android.intent.action.VIEW", Uri.parse(news.link));
             startActivity(viewIntent);
         });
