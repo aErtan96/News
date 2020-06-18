@@ -57,7 +57,7 @@ public class JSONParser {
             News news = new News();
             news.newsId = newsJsonObject.getInt("id");
             news.title = newsJsonObject.getString("title");
-            news.body = newsJsonObject.getString("body");
+            news.summary = newsJsonObject.getString("summary");
             news.subTitle = newsJsonObject.getString("sub_title");
             news.publishDateStr = newsJsonObject.getString("publish_date");
             news.link = newsJsonObject.getString("link");

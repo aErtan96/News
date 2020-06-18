@@ -56,10 +56,10 @@ public class ArticleFragment extends Fragment {
     public void setNewsData(News news){
         articleHeader.setText(news.title);
         if(news.subTitle != null && news.subTitle.length() != 0){
-            articleBody.setText(news.subTitle + "\n\n" + news.body);
+            articleBody.setText(news.subTitle + "\n\n" + news.summary);
         }
         else{
-            articleBody.setText(news.body);
+            articleBody.setText(news.summary);
         }
         articleDate.setText(news.getPublishDatePart());
         articleOpenInNew.setOnClickListener(v -> {

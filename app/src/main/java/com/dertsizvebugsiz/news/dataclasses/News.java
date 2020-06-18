@@ -7,7 +7,7 @@ public class News {
     public int newsId;
     public String title;
     public String subTitle;
-    public String body;
+    public String summary;
     public String publishDateStr;
     public int siteId;
     public String siteName;
@@ -17,18 +17,18 @@ public class News {
 
     }
 
-    public News(String title, String body, String date, int siteId) {
+    public News(String title, String summary, String date, int siteId) {
         this.title = title;
-        this.body = body;
+        this.summary = summary;
         this.publishDateStr = date;
         this.siteId = siteId;
     }
 
-    public News(int newsId, String title, String subTitle, String body, String date, int siteId, String siteName, String link) {
+    public News(int newsId, String title, String subTitle, String summary, String date, int siteId, String siteName, String link) {
         this.newsId = newsId;
         this.title = title;
         this.subTitle = subTitle;
-        this.body = body;
+        this.summary = summary;
         this.publishDateStr = date;
         this.siteId = siteId;
         this.siteName = siteName;
