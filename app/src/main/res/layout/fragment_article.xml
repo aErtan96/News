@@ -157,16 +157,18 @@
                         android:layout_height="wrap_content">
 
                         <ImageButton
+                            android:id="@+id/article_up_vote"
                             android:layout_width="32dp"
                             android:layout_height="32dp"
-                            android:background="#00000000"
                             android:scaleType="centerCrop"
+                            android:background="?attr/selectableItemBackgroundBorderless"
                             android:src="@drawable/thumbs_up_216px"/>
 
                         <ImageButton
+                            android:id="@+id/article_down_vote"
                             android:layout_width="32dp"
                             android:layout_height="32dp"
-                            android:background="#00000000"
+                            android:background="?attr/selectableItemBackgroundBorderless"
                             android:scaleType="centerCrop"
                             android:layout_marginStart="16dp"
                             android:src="@drawable/thumbs_down_216px"/>

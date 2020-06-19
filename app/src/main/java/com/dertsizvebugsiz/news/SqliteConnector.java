@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import com.dertsizvebugsiz.news.dataclasses.News;
+import com.dertsizvebugsiz.news.enums.Vote;
+
 import java.util.LinkedHashMap;
 
 public class SqliteConnector extends SQLiteOpenHelper {
@@ -36,6 +38,11 @@ public class SqliteConnector extends SQLiteOpenHelper {
                         "publish_time_str TEXT, " +
                         "site_id INTEGER, " +
                         "link TEXT)"
+        );
+        db.execSQL(
+                "CREATE TABLE feedbacks " +
+                        "(news_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        "vote INTEGER)"
         );
     }
 
@@ -77,6 +84,47 @@ public class SqliteConnector extends SQLiteOpenHelper {
     public void deleteBookmark(int newsId){
         SQLiteDatabase db = getWritableDatabase();
         db.delete("bookmarks", "news_id=?", new String[]{String.valueOf(newsId)});
+    }
+
+
+
+
+    public Vote getVoteOfNews(int newsId){
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor c = db.rawQuery("SELECT vote FROM feedbacks WHERE news_id = " + newsId, null);
+
+        Vote v;
+        if(c.getCount() == 0){
+            v = Vote.NONE;
+        }
+        else{
+            c.moveToFirst();
+            v = Vote.parseEnum(c.getInt(0));
+        }
+
+        c.close();
+        return v;
+    }
+
+    public void setVoteOfNews(int newsId, Vote vote){
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor c = db.rawQuery("SELECT vote FROM feedbacks WHERE news_id = " + newsId, null);
+
+        boolean feedbackExists = c.getCount() != 0;
+        c.close();
+
+        if(feedbackExists){
+            ContentValues cv = new ContentValues();
+            cv.put("vote", Vote.parseInt(vote));
+            db.update("feedbacks", cv, "news_id=?", new String[]{ String.valueOf(newsId) });
+        }
+        else{
+            ContentValues cv = new ContentValues();
+            cv.put("news_id", newsId);
+            cv.put("vote", Vote.parseInt(vote));
+            db.insert("feedbacks", null, cv);
+        }
+
     }
 
 }

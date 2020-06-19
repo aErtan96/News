@@ -12,11 +12,15 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.dertsizvebugsiz.news.AppConstants;
 import com.dertsizvebugsiz.news.R;
@@ -24,6 +28,7 @@ import com.dertsizvebugsiz.news.SqliteConnector;
 import com.dertsizvebugsiz.news.adapters.ViewPagerAdapter;
 import com.dertsizvebugsiz.news.dataclasses.Currency;
 import com.dertsizvebugsiz.news.dataclasses.News;
+import com.dertsizvebugsiz.news.enums.Vote;
 import com.dertsizvebugsiz.news.fragments.ArticleFragment;
 import com.dertsizvebugsiz.news.fragments.CurrenciesFragment;
 import com.dertsizvebugsiz.news.fragments.RecentNewsFragment;
@@ -32,7 +37,10 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
+
 import static com.dertsizvebugsiz.news.AppConstants.COINS_API_URL;
 import static com.dertsizvebugsiz.news.AppConstants.CURRENCY_REQUEST_TAG;
 import static com.dertsizvebugsiz.news.AppConstants.NEWS_FEED_REQUEST_TAG;
@@ -71,8 +79,6 @@ public class MainActivity extends AppCompatActivity {
         setUpToolbar();
 
         queue = Volley.newRequestQueue(this);
-
-        Log.d("ANDROID ID:", "" + Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID));
     }
 
     @Override
@@ -319,6 +325,27 @@ public class MainActivity extends AppCompatActivity {
         queue.add(currencyRequest);
     }
 
+    public void newsFeedbackSent(int newsId, Vote vote){
+        SqliteConnector.getInstance(this).setVoteOfNews(newsId, vote);
+        StringRequest summaryFeedbackRequest = new StringRequest(Request.Method.POST, AppConstants.SUMMARY_FEEDBACK_URL, null, null){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                HashMap<String, String> params = new HashMap<String, String>();
+                params.put("device_id", getDeviceId());
+                params.put("news_id", String.valueOf(newsId));
+                params.put("vote", String.valueOf(Vote.parseInt(vote)));
+                return params;
+            }
+        };
+        summaryFeedbackRequest.setTag(AppConstants.SUMMARY_FEEDBACK_TAG);
+        queue.add(summaryFeedbackRequest);
+    }
+
+
+
+    private String getDeviceId(){
+        return Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+    }
 
 
 }
