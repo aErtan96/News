@@ -40,6 +40,7 @@ public class JSONParser {
                 singleNews.title = singleNewsJson.getString("title");
                 singleNews.publishDateStr = singleNewsJson.getString("publish_date");
                 singleNews.siteId = singleNewsJson.getInt("site_id");
+                singleNews.siteName = singleNewsJson.getString("name");
                 singleNews.link = singleNewsJson.getString("link");
                 feed[i] = singleNews;
             }

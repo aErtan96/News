@@ -77,7 +77,7 @@ public class RecentNewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     class RecentNewsViewHolder extends RecyclerView.ViewHolder{
 
         ImageView icon, bookmark;
-        TextView header, datetime;
+        TextView siteName, header, datetime;
         CardView container;
 
         RecentNewsViewHolder(View itemView) {
@@ -88,12 +88,14 @@ public class RecentNewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         void getViews(View root){
             icon = root.findViewById(R.id.recent_news_item_icon);
             bookmark = root.findViewById(R.id.recent_news_item_bookmark);
+            siteName = root.findViewById(R.id.recent_news_item_site_name);
             header = root.findViewById(R.id.recent_news_item_header);
             container = root.findViewById(R.id.recent_news_recycler_item_container);
             datetime = root.findViewById(R.id.recent_news_item_datetime);
         }
 
         void setData(News news){
+            siteName.setText(news.siteName);
             header.setText(news.title);
             datetime.setText(news.getPublishDatePart());
 

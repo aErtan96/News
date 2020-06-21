@@ -39,6 +39,15 @@
             app:layout_constraintEnd_toStartOf="@id/recent_news_item_bookmark">
 
             <TextView
+                android:id="@+id/recent_news_item_site_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:text="Lorem Ipsum"
+
+                />
+
+            <TextView
                 android:id="@+id/recent_news_item_header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
