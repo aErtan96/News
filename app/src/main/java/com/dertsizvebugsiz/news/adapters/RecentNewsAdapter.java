@@ -6,16 +6,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.bumptech.glide.Glide;
 import com.dertsizvebugsiz.news.AppConstants;
 import com.dertsizvebugsiz.news.R;
-import com.dertsizvebugsiz.news.SqliteConnector;
 import com.dertsizvebugsiz.news.activities.MainActivity;
 import com.dertsizvebugsiz.news.dataclasses.News;
 import java.util.ArrayList;
-import java.util.Random;
-
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -24,6 +20,8 @@ public class RecentNewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     public ArrayList<News> news;
     private MainActivity mainActivity;
     private LayoutInflater layoutInflater;
+
+    public int separatorIndex = -1;
 
     public RecentNewsAdapter(ArrayList<News> news, MainActivity mainActivity, LayoutInflater layoutInflater) {
         this.news = news;
@@ -40,12 +38,18 @@ public class RecentNewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             case 1:
                 View v1 = layoutInflater.inflate(R.layout.recent_news_recycler_item_loading, parent,false);
                 return new LoadingViewHolder(v1);
+            case 2:
+                View v2 = layoutInflater.inflate(R.layout.recent_news_recycler_item_separator, parent,false);
+                return new LoadingViewHolder(v2);
         }
 
         return null;
     }
 
     public int getItemViewType(int position) {
+        if(position == separatorIndex){
+            return 2;
+        }
         if(position < news.size()){
             return 0;
         }
@@ -55,7 +59,7 @@ public class RecentNewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if(position < news.size()){
+        if(position != separatorIndex && position < news.size()){
             ((RecentNewsViewHolder)holder).setData(news.get(position));
         }
     }
@@ -64,7 +68,10 @@ public class RecentNewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     @Override
     public int getItemCount() {
-        return news.size() + 1;
+        if(separatorIndex == -1)
+            return news.size() + 1;
+        else
+            return news.size() + 2;
     }
 
     class RecentNewsViewHolder extends RecyclerView.ViewHolder{
@@ -116,6 +123,12 @@ public class RecentNewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     static class LoadingViewHolder extends RecyclerView.ViewHolder{
         LoadingViewHolder(View itemView) {
+            super(itemView);
+        }
+    }
+
+    static class SeparatorViewHolder extends RecyclerView.ViewHolder{
+        SeparatorViewHolder(View itemView) {
             super(itemView);
         }
     }

@@ -40,9 +40,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import static com.dertsizvebugsiz.news.AppConstants.COINS_API_URL;
 import static com.dertsizvebugsiz.news.AppConstants.CURRENCY_REQUEST_TAG;
+import static com.dertsizvebugsiz.news.AppConstants.LAST_UPLOADED_NEWS_REQUEST_TAG;
 import static com.dertsizvebugsiz.news.AppConstants.NEWS_FEED_REQUEST_TAG;
 import static com.dertsizvebugsiz.news.AppConstants.SINGLE_NEW_REQUEST_TAG;
 
@@ -58,7 +58,8 @@ public class MainActivity extends AppCompatActivity {
     RequestQueue queue;
 
     private int newsFeedLimit = 15;
-    private int newsFeedLastOffset = -15;
+    private News lastPulledNews = null;
+    private int unreadMessageCount = 0;
 
     private ConstraintLayout fragmentArticleContainer;
     private ConstraintLayout articleLoadingIndicator;
@@ -75,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
         fragmentArticleContainer = findViewById(R.id.article_fragment_container);
         articleLoadingIndicator = findViewById(R.id.article_loading);
 
-        createBottomTabBarAndViwPager();
+        createBottomTabBarAndViewPager();
         setUpToolbar();
 
         queue = Volley.newRequestQueue(this);
@@ -131,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
     }
 
-    public void createBottomTabBarAndViwPager(){
+    public void createBottomTabBarAndViewPager(){
 
         fragmentAdapter = new ViewPagerAdapter(getSupportFragmentManager());
 
@@ -278,25 +279,28 @@ public class MainActivity extends AppCompatActivity {
     public void loadMoreIntoRecentNews(){
         Log.d("DEBUG","loadMoreIntoRecentNews");
         final RecentNewsFragment recentNewsFragment = ((RecentNewsFragment)fragmentAdapter.getRegisteredFragment(1));
-        newsFeedLastOffset += newsFeedLimit;
-        Log.d("DEBUG", AppConstants.getNewsFeedUrl(newsFeedLimit, newsFeedLastOffset));
-        JsonArrayRequest newsFeedRequest = new JsonArrayRequest(AppConstants.getNewsFeedUrl(newsFeedLimit, newsFeedLastOffset),
+        Log.d("DEBUG", AppConstants.getNewsFeedUrl(newsFeedLimit, lastPulledNews));
+        JsonArrayRequest newsFeedRequest = new JsonArrayRequest(AppConstants.getNewsFeedUrl(newsFeedLimit, lastPulledNews),
             new Response.Listener<JSONArray>() {
                 public void onResponse(JSONArray response) {
                     News[] newsFeed = JSONParser.parseNewsFeedResponse(response);
-                    if(recentNewsFragment.recentNewsAdapter.news.size() == 0){
-                        recentNewsFragment.recentNewsAdapter.news.addAll(Arrays.asList(newsFeed));
-                        recentNewsFragment.recentNewsAdapter.notifyDataSetChanged();
-                    }
-                    else{
-                        recentNewsFragment.recentNewsAdapter.news.addAll(Arrays.asList(newsFeed));
-                        recentNewsFragment.recentNewsAdapter.notifyItemRangeInserted(recentNewsFragment.recentNewsAdapter.news.size() - newsFeed.length, newsFeed.length);
+                    if(newsFeed != null && newsFeed.length > 0){
+                        lastPulledNews = newsFeed[newsFeed.length - 1];
+                        if(recentNewsFragment.recentNewsAdapter.news.size() == 0){
+                            recentNewsFragment.recentNewsAdapter.news.addAll(Arrays.asList(newsFeed));
+                            recentNewsFragment.recentNewsAdapter.notifyDataSetChanged();
+                        }
+                        else{
+                            recentNewsFragment.recentNewsAdapter.news.addAll(Arrays.asList(newsFeed));
+                            recentNewsFragment.recentNewsAdapter.notifyItemRangeInserted(recentNewsFragment.recentNewsAdapter.news.size() - newsFeed.length, newsFeed.length);
+                        }
                     }
                 }
             },
             new Response.ErrorListener() {
                 public void onErrorResponse(VolleyError error) {
-                    Log.e("ERROR","Volley error occur\n" + error.getMessage());
+                    Log.e("ERROR","Volley error occur\n");
+                    error.printStackTrace();
                 }
             });
 
@@ -323,6 +327,39 @@ public class MainActivity extends AppCompatActivity {
         currencyRequest.setTag(CURRENCY_REQUEST_TAG);
         queue.cancelAll(CURRENCY_REQUEST_TAG);
         queue.add(currencyRequest);
+    }
+
+    public void loadLastUploadedNews(){
+        Log.d("DEBUG","loadLastUploadedNews");
+        final RecentNewsFragment recentNewsFragment = ((RecentNewsFragment)fragmentAdapter.getRegisteredFragment(1));
+        if(recentNewsFragment.recentNewsAdapter == null || recentNewsFragment.recentNewsAdapter.news == null || recentNewsFragment.recentNewsAdapter.news.size() < 1){
+            return;
+        }
+        String link = AppConstants.getLastUploadedNewsUrl(recentNewsFragment.recentNewsAdapter.news.get(0));
+        Log.d("DEBUG", link);
+        JsonArrayRequest newsFeedRequest = new JsonArrayRequest(link,
+                new Response.Listener<JSONArray>() {
+                    public void onResponse(JSONArray response) {
+                        ((RecentNewsFragment)fragmentAdapter.getRegisteredFragment(1)).RefreshCompleted();
+                        News[] newsFeed = JSONParser.parseNewsFeedResponse(response);
+                        if(newsFeed != null && newsFeed.length > 0){
+                            recentNewsFragment.recentNewsAdapter.separatorIndex = newsFeed.length;
+                            recentNewsFragment.recentNewsAdapter.news.addAll(0, Arrays.asList(newsFeed));
+                            recentNewsFragment.recentNewsAdapter.notifyItemRangeInserted(0, newsFeed.length);
+                            recentNewsFragment.recentNewsRecyclerView.smoothScrollToPosition(0);
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("ERROR","Volley error occur\n" );
+                        error.printStackTrace();
+                    }
+                });
+
+        newsFeedRequest.setTag(LAST_UPLOADED_NEWS_REQUEST_TAG);
+        queue.cancelAll(LAST_UPLOADED_NEWS_REQUEST_TAG);
+        queue.add(newsFeedRequest);
     }
 
     public void newsFeedbackSent(int newsId, Vote vote){

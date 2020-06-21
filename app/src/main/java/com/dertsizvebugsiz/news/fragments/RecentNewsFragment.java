@@ -21,6 +21,7 @@ import java.util.Arrays;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 public class RecentNewsFragment extends Fragment {
 
@@ -31,6 +32,8 @@ public class RecentNewsFragment extends Fragment {
 
     public RecyclerView collectionsRecyclerView;
     public CollectionsAdapter collectionsAdapter;
+
+    public SwipeRefreshLayout recentNewsSwipe;
 
 
     public static RecentNewsFragment newInstance(){
@@ -58,6 +61,8 @@ public class RecentNewsFragment extends Fragment {
 
         recentNewsContainer = root.findViewById(R.id.recent_news_recyclerview_container);
         collectionsContainer = root.findViewById(R.id.collections_recyclerview_container);
+
+        recentNewsSwipe = root.findViewById(R.id.recent_news_swipe_refresh);
     }
 
     private void initRecentNewsRecycler(){
@@ -83,6 +88,7 @@ public class RecentNewsFragment extends Fragment {
                 ((MainActivity)getActivity()).loadMoreIntoRecentNews();
             }
         });
+        recentNewsSwipe.setOnRefreshListener(() -> ((MainActivity)getActivity()).loadLastUploadedNews());
     }
 
     public void openRecentNewsRecycler(){
@@ -95,6 +101,10 @@ public class RecentNewsFragment extends Fragment {
         recentNewsContainer.setVisibility(View.INVISIBLE);
         collectionsContainer.setVisibility(View.VISIBLE);
         collectionsAdapter.notifyDataSetChanged();
+    }
+
+    public void RefreshCompleted(){
+        recentNewsSwipe.setRefreshing(false);
     }
 
 }
