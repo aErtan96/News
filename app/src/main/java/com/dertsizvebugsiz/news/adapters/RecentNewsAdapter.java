@@ -53,6 +53,9 @@ public class RecentNewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         if(position < news.size()){
             return 0;
         }
+        if(separatorIndex != -1 && position == news.size()){
+            return 0;
+        }
         return 1;
     }
 
@@ -60,7 +63,10 @@ public class RecentNewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if(position != separatorIndex && position < news.size()){
-            ((RecentNewsViewHolder)holder).setData(news.get(position));
+            if(separatorIndex != - 1 && position > separatorIndex)
+                ((RecentNewsViewHolder)holder).setData(news.get(position - 1));
+            else
+                ((RecentNewsViewHolder)holder).setData(news.get(position));
         }
     }
 

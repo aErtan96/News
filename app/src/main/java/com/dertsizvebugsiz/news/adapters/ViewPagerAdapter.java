@@ -2,7 +2,7 @@ package com.dertsizvebugsiz.news.adapters;
 
 import com.dertsizvebugsiz.news.fragments.CurrenciesFragment;
 import com.dertsizvebugsiz.news.fragments.RecentNewsFragment;
-import com.dertsizvebugsiz.news.fragments.TestFragment;
+import com.dertsizvebugsiz.news.fragments.SettingsFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,7 @@ public class ViewPagerAdapter extends SmartFragmentStatePagerAdapter {
             case 1:
                 return RecentNewsFragment.newInstance();
             case 2:
-                return TestFragment.newInstance(i);
+                return SettingsFragment.newInstance(i);
             default:
                 return null;
         }

@@ -1,23 +1,27 @@
 package com.dertsizvebugsiz.news.fragments;
 
+import android.animation.Animator;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Interpolator;
+import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
-
 import com.dertsizvebugsiz.news.EndlessRecyclerViewScrollListener;
 import com.dertsizvebugsiz.news.R;
 import com.dertsizvebugsiz.news.activities.MainActivity;
 import com.dertsizvebugsiz.news.adapters.CollectionsAdapter;
 import com.dertsizvebugsiz.news.adapters.RecentNewsAdapter;
 import com.dertsizvebugsiz.news.dataclasses.News;
+import com.dertsizvebugsiz.news.utils.Converter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -25,20 +29,22 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 public class RecentNewsFragment extends Fragment {
 
-    private LinearLayout recentNewsContainer, collectionsContainer;
+    private ConstraintLayout recentNewsContainer;
+    private LinearLayout collectionsContainer;
 
     public RecyclerView recentNewsRecyclerView;
     public RecentNewsAdapter recentNewsAdapter;
 
-    public RecyclerView collectionsRecyclerView;
-    public CollectionsAdapter collectionsAdapter;
+    private RecyclerView collectionsRecyclerView;
+    private CollectionsAdapter collectionsAdapter;
 
     public SwipeRefreshLayout recentNewsSwipe;
 
+    private Button loadUnreadNewsButton;
+    private float loadUnreadNewsButtonBottomTranslationY, loadUnreadNewsButtonUpTranslationY;
 
     public static RecentNewsFragment newInstance(){
-        RecentNewsFragment recentNewsFragment = new RecentNewsFragment();
-        return recentNewsFragment;
+        return new RecentNewsFragment();
     }
 
     @Override
@@ -48,12 +54,13 @@ public class RecentNewsFragment extends Fragment {
         getViews(rootView);
         initRecentNewsRecycler();
         initCollectionsRecycler();
+        initUnreadNewsButtonTranslations();
         registerEventListeners();
-
-        Log.d("DEBUG", "ONCREATEVIEW");
 
         return rootView;
     }
+
+
 
     private void getViews(View root){
         recentNewsRecyclerView = root.findViewById(R.id.recent_news_recyclerview);
@@ -63,6 +70,7 @@ public class RecentNewsFragment extends Fragment {
         collectionsContainer = root.findViewById(R.id.collections_recyclerview_container);
 
         recentNewsSwipe = root.findViewById(R.id.recent_news_swipe_refresh);
+        loadUnreadNewsButton = root.findViewById(R.id.recent_news_load_unread_news_button);
     }
 
     private void initRecentNewsRecycler(){
@@ -81,6 +89,11 @@ public class RecentNewsFragment extends Fragment {
         collectionsRecyclerView.setLayoutManager(linearLayoutManager);
     }
 
+    private void initUnreadNewsButtonTranslations(){
+        loadUnreadNewsButtonBottomTranslationY = loadUnreadNewsButton.getTranslationY();
+        loadUnreadNewsButtonUpTranslationY = loadUnreadNewsButton.getTranslationY() + Converter.convertDpToPixel(-50, getActivity());
+    }
+
     private void registerEventListeners(){
         recentNewsRecyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener((LinearLayoutManager) recentNewsRecyclerView.getLayoutManager()) {
             @Override
@@ -89,7 +102,17 @@ public class RecentNewsFragment extends Fragment {
             }
         });
         recentNewsSwipe.setOnRefreshListener(() -> ((MainActivity)getActivity()).loadLastUploadedNews());
+        loadUnreadNewsButton.setOnClickListener(v -> {
+            if(!recentNewsSwipe.isRefreshing()){
+                recentNewsRecyclerView.smoothScrollToPosition(0);
+                recentNewsSwipe.setRefreshing(true);
+                ((MainActivity)getActivity()).loadLastUploadedNews();
+            }
+        });
     }
+
+
+
 
     public void openRecentNewsRecycler(){
         recentNewsContainer.setVisibility(View.VISIBLE);
@@ -103,8 +126,24 @@ public class RecentNewsFragment extends Fragment {
         collectionsAdapter.notifyDataSetChanged();
     }
 
-    public void RefreshCompleted(){
+    public void refreshCompleted(){
         recentNewsSwipe.setRefreshing(false);
     }
+
+
+
+    public void playLoadUnreadNewsButtonAnim(boolean isReverse){
+        loadUnreadNewsButton
+                .animate()
+                .translationY(isReverse ? loadUnreadNewsButtonBottomTranslationY : loadUnreadNewsButtonUpTranslationY)
+                .setDuration(1000)
+                .start();
+    }
+
+    public void setLoadUnreadNewsButtonCount(int count){
+        loadUnreadNewsButton.setText(count + " Unread News");
+    }
+
+
 
 }

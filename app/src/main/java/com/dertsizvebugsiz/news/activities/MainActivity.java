@@ -7,6 +7,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.viewpager.widget.ViewPager;
 import devlight.io.library.ntb.NavigationTabBar;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
@@ -14,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -59,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
 
     private int newsFeedLimit = 15;
     private News lastPulledNews = null;
-    private int unreadMessageCount = 0;
+
 
     private ConstraintLayout fragmentArticleContainer;
     private ConstraintLayout articleLoadingIndicator;
@@ -67,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
     private MenuItem collectionsButton, allNewsButton;
     private String selectedToolbarButton = "all_news";
 
+    private int unreadNewsCountCheckerRunInterval = 5000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
         setUpToolbar();
 
         queue = Volley.newRequestQueue(this);
+        startCheckingUnreadNewsCount();
     }
 
     @Override
@@ -285,6 +289,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onResponse(JSONArray response) {
                     News[] newsFeed = JSONParser.parseNewsFeedResponse(response);
                     if(newsFeed != null && newsFeed.length > 0){
+
                         lastPulledNews = newsFeed[newsFeed.length - 1];
                         if(recentNewsFragment.recentNewsAdapter.news.size() == 0){
                             recentNewsFragment.recentNewsAdapter.news.addAll(Arrays.asList(newsFeed));
@@ -335,17 +340,19 @@ public class MainActivity extends AppCompatActivity {
         if(recentNewsFragment.recentNewsAdapter == null || recentNewsFragment.recentNewsAdapter.news == null || recentNewsFragment.recentNewsAdapter.news.size() < 1){
             return;
         }
+        recentNewsFragment.playLoadUnreadNewsButtonAnim(true);
         String link = AppConstants.getLastUploadedNewsUrl(recentNewsFragment.recentNewsAdapter.news.get(0));
         Log.d("DEBUG", link);
         JsonArrayRequest newsFeedRequest = new JsonArrayRequest(link,
                 new Response.Listener<JSONArray>() {
                     public void onResponse(JSONArray response) {
-                        ((RecentNewsFragment)fragmentAdapter.getRegisteredFragment(1)).RefreshCompleted();
+                        ((RecentNewsFragment)fragmentAdapter.getRegisteredFragment(1)).refreshCompleted();
                         News[] newsFeed = JSONParser.parseNewsFeedResponse(response);
                         if(newsFeed != null && newsFeed.length > 0){
                             recentNewsFragment.recentNewsAdapter.separatorIndex = newsFeed.length;
                             recentNewsFragment.recentNewsAdapter.news.addAll(0, Arrays.asList(newsFeed));
-                            recentNewsFragment.recentNewsAdapter.notifyItemRangeInserted(0, newsFeed.length);
+                            //recentNewsFragment.recentNewsAdapter.notifyItemRangeInserted(0, newsFeed.length);
+                            recentNewsFragment.recentNewsAdapter.notifyDataSetChanged();
                             recentNewsFragment.recentNewsRecyclerView.smoothScrollToPosition(0);
                         }
                     }
@@ -360,6 +367,37 @@ public class MainActivity extends AppCompatActivity {
         newsFeedRequest.setTag(LAST_UPLOADED_NEWS_REQUEST_TAG);
         queue.cancelAll(LAST_UPLOADED_NEWS_REQUEST_TAG);
         queue.add(newsFeedRequest);
+    }
+
+    public void startCheckingUnreadNewsCount(){
+        final RecentNewsFragment recentNewsFragment = ((RecentNewsFragment)fragmentAdapter.getRegisteredFragment(1));
+        String url;
+        if(recentNewsFragment == null || recentNewsFragment.recentNewsAdapter == null || recentNewsFragment.recentNewsAdapter.news == null || recentNewsFragment.recentNewsAdapter.news.size() < 1){
+            url = AppConstants.getUnreadNewsCountUrl(null);
+        }
+        else{
+            url = AppConstants.getUnreadNewsCountUrl(recentNewsFragment.recentNewsAdapter.news.get(0));
+        }
+        StringRequest unreadNewsCountRequest = new StringRequest(url,
+            response -> {
+                Log.d("DEBUG", "Count: " + response);
+                if(!isDestroyed()){
+                    if(recentNewsFragment != null && recentNewsFragment.recentNewsSwipe != null && !recentNewsFragment.recentNewsSwipe.isRefreshing()){
+                        setUnreadMessageCount(Integer.parseInt(response));
+                    }
+                    new Handler().postDelayed(this::startCheckingUnreadNewsCount, unreadNewsCountCheckerRunInterval);
+                }
+            }, error -> {
+                Log.d("DEBUG", "ERROR: " + error.toString());
+                if(!isDestroyed())
+                    new Handler().postDelayed(this::startCheckingUnreadNewsCount, unreadNewsCountCheckerRunInterval);
+            }
+        );
+        queue.cancelAll(AppConstants.UNREAD_NEWS_COUNT_REQUEST_TAG);
+
+        unreadNewsCountRequest.setTag(AppConstants.UNREAD_NEWS_COUNT_REQUEST_TAG);
+        unreadNewsCountRequest.setRetryPolicy(new DefaultRetryPolicy(unreadNewsCountCheckerRunInterval, 0, 1));
+        queue.add(unreadNewsCountRequest);
     }
 
     public void newsFeedbackSent(int newsId, Vote vote){
@@ -377,6 +415,20 @@ public class MainActivity extends AppCompatActivity {
         summaryFeedbackRequest.setTag(AppConstants.SUMMARY_FEEDBACK_TAG);
         queue.add(summaryFeedbackRequest);
     }
+
+    public void setUnreadMessageCount(int count){
+        if(count > 0)
+        {
+            ((RecentNewsFragment)fragmentAdapter.getRegisteredFragment(1)).playLoadUnreadNewsButtonAnim(false);
+            ((RecentNewsFragment)fragmentAdapter.getRegisteredFragment(1)).setLoadUnreadNewsButtonCount(count);
+        }
+        else{
+            ((RecentNewsFragment)fragmentAdapter.getRegisteredFragment(1)).playLoadUnreadNewsButtonAnim(true);
+        }
+    }
+
+
+
 
 
 

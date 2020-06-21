@@ -10,14 +10,14 @@ import com.dertsizvebugsiz.news.R;
 
 import androidx.fragment.app.Fragment;
 
-public class TestFragment extends Fragment {
+public class SettingsFragment extends Fragment {
 
     public int testInt;
 
-    public static TestFragment newInstance(int testInt){
-        TestFragment testFragment = new TestFragment();
-        testFragment.testInt = testInt;
-        return testFragment;
+    public static SettingsFragment newInstance(int testInt){
+        SettingsFragment settingsFragment = new SettingsFragment();
+        settingsFragment.testInt = testInt;
+        return settingsFragment;
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
