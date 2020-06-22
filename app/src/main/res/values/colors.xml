@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <color name="colorPrimaryVeryLight">#87A0EF</color>
     <color name="colorPrimaryLight">#5472d3</color>
     <color name="colorPrimary">#0d47a1</color>
     <color name="colorPrimaryDark">#002171</color>
@@ -9,7 +10,9 @@
 
 
     <color name="white">#FFFFFF</color>
+    <color name="grey">#818181</color>
     <color name="light_grey">#A8A8A8</color>
+    <color name="very_light_grey">#D6D6D6</color>
 
 
     <color name="priceChangePositive">#19DA19</color>

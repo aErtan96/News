@@ -3,8 +3,10 @@ package com.dertsizvebugsiz.news.parser;
 import android.util.Log;
 import com.dertsizvebugsiz.news.dataclasses.Currency;
 import com.dertsizvebugsiz.news.dataclasses.News;
+import com.dertsizvebugsiz.news.dataclasses.Site;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import java.util.LinkedHashMap;
 
 public class JSONParser {
 
@@ -66,6 +68,26 @@ public class JSONParser {
         }
         catch (Exception e){
             Log.e("ERROR","Error occur while parsing singleNewsResponse\n" + e.getMessage());
+            return null;
+        }
+    }
+
+    public static LinkedHashMap<Integer, Site> parseSitesResponse(JSONArray response){
+        try{
+            LinkedHashMap<Integer, Site> sites = new LinkedHashMap<>();
+            for(int i = 0; i < response.length(); i++){
+                JSONObject singleSiteJson = response.getJSONObject(i);
+                Site site = new Site();
+                site.siteId = singleSiteJson.getInt("id");
+                site.name = singleSiteJson.getString("name");
+                site.homeUrl = singleSiteJson.getString("home_url");
+                sites.put(site.siteId, site);
+            }
+            Log.d("DEBUG", "json parser size: " + sites.size());
+            return sites;
+        }
+        catch (Exception e){
+            Log.e("ERROR","Error occur while parsing news feed\n" + e.getMessage());
             return null;
         }
     }

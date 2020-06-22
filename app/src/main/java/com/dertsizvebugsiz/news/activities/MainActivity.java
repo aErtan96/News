@@ -13,7 +13,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -30,10 +29,12 @@ import com.dertsizvebugsiz.news.SqliteConnector;
 import com.dertsizvebugsiz.news.adapters.ViewPagerAdapter;
 import com.dertsizvebugsiz.news.dataclasses.Currency;
 import com.dertsizvebugsiz.news.dataclasses.News;
+import com.dertsizvebugsiz.news.dataclasses.Site;
 import com.dertsizvebugsiz.news.enums.Vote;
 import com.dertsizvebugsiz.news.fragments.ArticleFragment;
 import com.dertsizvebugsiz.news.fragments.CurrenciesFragment;
 import com.dertsizvebugsiz.news.fragments.RecentNewsFragment;
+import com.dertsizvebugsiz.news.fragments.SettingsFragment;
 import com.dertsizvebugsiz.news.parser.JSONParser;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -47,6 +48,8 @@ import static com.dertsizvebugsiz.news.AppConstants.CURRENCY_REQUEST_TAG;
 import static com.dertsizvebugsiz.news.AppConstants.LAST_UPLOADED_NEWS_REQUEST_TAG;
 import static com.dertsizvebugsiz.news.AppConstants.NEWS_FEED_REQUEST_TAG;
 import static com.dertsizvebugsiz.news.AppConstants.SINGLE_NEW_REQUEST_TAG;
+import static com.dertsizvebugsiz.news.AppConstants.SITES_REQUEST_TAG;
+import static com.dertsizvebugsiz.news.AppConstants.SITES_UPDATE_URL;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -61,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
 
     private int newsFeedLimit = 15;
     private News lastPulledNews = null;
-
 
     private ConstraintLayout fragmentArticleContainer;
     private ConstraintLayout articleLoadingIndicator;
@@ -137,7 +139,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void createBottomTabBarAndViewPager(){
-
         fragmentAdapter = new ViewPagerAdapter(getSupportFragmentManager());
 
         viewPager = findViewById(R.id.fragmentsViewPager);
@@ -162,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
                         changeTitle("News Feed");
                         break;
                     case 2:
-                        changeTitle("Settings");
+                        changeTitle("Sources");
                         break;
                 }
             }
@@ -193,9 +194,9 @@ public class MainActivity extends AppCompatActivity {
         );
         models.add(
                 new NavigationTabBar.Model.Builder(
-                        getResources().getDrawable(R.drawable.ic_settings_applications_white_24dp),
+                        getResources().getDrawable(R.drawable.ic_input_white_24dp),
                         getResources().getColor(R.color.colorPrimaryDark)
-                ).title("Settings")
+                ).title("Sources")
                         .badgeTitle("icon")
                         .build()
         );
@@ -283,8 +284,9 @@ public class MainActivity extends AppCompatActivity {
     public void loadMoreIntoRecentNews(){
         Log.d("DEBUG","loadMoreIntoRecentNews");
         final RecentNewsFragment recentNewsFragment = ((RecentNewsFragment)fragmentAdapter.getRegisteredFragment(1));
-        Log.d("DEBUG", AppConstants.getNewsFeedUrl(newsFeedLimit, lastPulledNews));
-        JsonArrayRequest newsFeedRequest = new JsonArrayRequest(AppConstants.getNewsFeedUrl(newsFeedLimit, lastPulledNews),
+        String url = AppConstants.getNewsFeedUrl(newsFeedLimit, lastPulledNews, SqliteConnector.getInstance(this).getDisabledSiteIds());
+        Log.d("DEBUG", url);
+        JsonArrayRequest newsFeedRequest = new JsonArrayRequest(url,
             new Response.Listener<JSONArray>() {
                 public void onResponse(JSONArray response) {
                     News[] newsFeed = JSONParser.parseNewsFeedResponse(response);
@@ -341,7 +343,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         recentNewsFragment.playLoadUnreadNewsButtonAnim(true);
-        String link = AppConstants.getLastUploadedNewsUrl(recentNewsFragment.recentNewsAdapter.news.get(0));
+        String link = AppConstants.getLastUploadedNewsUrl(recentNewsFragment.recentNewsAdapter.news.get(0), SqliteConnector.getInstance(this).getDisabledSiteIds());
         Log.d("DEBUG", link);
         JsonArrayRequest newsFeedRequest = new JsonArrayRequest(link,
                 new Response.Listener<JSONArray>() {
@@ -369,14 +371,41 @@ public class MainActivity extends AppCompatActivity {
         queue.add(newsFeedRequest);
     }
 
+    public void getServerSites(){
+        Log.d("DEBUG","getServerSites");
+        final SettingsFragment settingsFragment = ((SettingsFragment)fragmentAdapter.getRegisteredFragment(2));
+        JsonArrayRequest sitesRequest = new JsonArrayRequest(SITES_UPDATE_URL,
+                new Response.Listener<JSONArray>() {
+                    public void onResponse(JSONArray response) {
+                        LinkedHashMap<Integer, Site> sitesOnServer = JSONParser.parseSitesResponse(response);
+                        if(sitesOnServer == null){
+                            Log.d("DEBUG", "Get Sites Server Error");
+                            return;
+                        }
+                        SqliteConnector.getInstance(getMainActivity()).performSitesSync(sitesOnServer);
+                        ((SettingsFragment)fragmentAdapter.getRegisteredFragment(2)).initSitesRecycler();
+                    }
+                },
+                new Response.ErrorListener() {
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("ERROR","Volley error occur while pulling sites\n");
+                        error.printStackTrace();
+                    }
+                });
+        queue.cancelAll(SITES_REQUEST_TAG);
+        sitesRequest.setRetryPolicy(new DefaultRetryPolicy(5000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, 1));
+        sitesRequest.setTag(SITES_REQUEST_TAG);
+        queue.add(sitesRequest);
+    }
+
     public void startCheckingUnreadNewsCount(){
         final RecentNewsFragment recentNewsFragment = ((RecentNewsFragment)fragmentAdapter.getRegisteredFragment(1));
         String url;
         if(recentNewsFragment == null || recentNewsFragment.recentNewsAdapter == null || recentNewsFragment.recentNewsAdapter.news == null || recentNewsFragment.recentNewsAdapter.news.size() < 1){
-            url = AppConstants.getUnreadNewsCountUrl(null);
+            url = AppConstants.getUnreadNewsCountUrl(null, SqliteConnector.getInstance(this).getDisabledSiteIds());
         }
         else{
-            url = AppConstants.getUnreadNewsCountUrl(recentNewsFragment.recentNewsAdapter.news.get(0));
+            url = AppConstants.getUnreadNewsCountUrl(recentNewsFragment.recentNewsAdapter.news.get(0), SqliteConnector.getInstance(this).getDisabledSiteIds());
         }
         StringRequest unreadNewsCountRequest = new StringRequest(url,
             response -> {
@@ -434,6 +463,10 @@ public class MainActivity extends AppCompatActivity {
 
     private String getDeviceId(){
         return Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+    }
+
+    private MainActivity getMainActivity(){
+        return this;
     }
 
 

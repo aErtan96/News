@@ -25,7 +25,7 @@ public class ViewPagerAdapter extends SmartFragmentStatePagerAdapter {
             case 1:
                 return RecentNewsFragment.newInstance();
             case 2:
-                return SettingsFragment.newInstance(i);
+                return new SettingsFragment();
             default:
                 return null;
         }
