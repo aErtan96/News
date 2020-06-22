@@ -10,7 +10,7 @@ public class AppConstants {
     private final static String NEWS_FEED_URL = "https://bcnews.xyz/get_news_feed.php?";
     private final static String LAST_UPLOADED_NEWS_URL = "https://bcnews.xyz/get_last_uploaded_news.php?";
     private final static String UNREAD_NEWS_COUNT_URL = "https://bcnews.xyz/get_unread_news_count.php?";
-    private final static String SITE_IMAGES_URL = "https://bcnews.xyz/images/site_";
+    private final static String SITE_IMAGES_URL = "https://bcnews.xyz/images-small/site_";
     public final static String SUMMARY_FEEDBACK_URL = "https://bcnews.xyz/send_news_feedback.php";
     public final static String SITES_UPDATE_URL = "https://bcnews.xyz/get_sites.php";
 
@@ -64,7 +64,7 @@ public class AppConstants {
     }
 
     public static String getSiteImageUrl(int siteId) {
-        return SITE_IMAGES_URL + siteId + ".png";
+        return SITE_IMAGES_URL + siteId  + ".png";
     }
 
     private static String convertDisabledSitesIdsToParameter(int[] disabledSiteIds){
