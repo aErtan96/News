@@ -70,8 +70,6 @@ public class RecentNewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         }
     }
 
-
-
     @Override
     public int getItemCount() {
         if(separatorIndex == -1)
@@ -80,7 +78,9 @@ public class RecentNewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             return news.size() + 2;
     }
 
-    class RecentNewsViewHolder extends RecyclerView.ViewHolder{
+    public class RecentNewsViewHolder extends RecyclerView.ViewHolder{
+
+        public News news;
 
         ImageView icon, bookmark;
         TextView siteName, header, datetime;
@@ -101,6 +101,7 @@ public class RecentNewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         }
 
         void setData(News news){
+            this.news = news;
             siteName.setText(news.siteName);
             header.setText(news.title);
             datetime.setText(news.getPublishDatePart());
@@ -114,13 +115,15 @@ public class RecentNewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 mainActivity.openArticleFragment(news.newsId);
             });
             if(mainActivity != null){
-                if(mainActivity.getBookmarks().containsKey(news.newsId)){
-                    bookmark.setImageResource(R.drawable.ic_bookmark_white_24dp);
-                    bookmark.setOnClickListener(new BookmarkClickListener(true, news));
-                }
-                else{
-                    bookmark.setImageResource(R.drawable.ic_bookmark_border_empty_24dp);
-                    bookmark.setOnClickListener(new BookmarkClickListener(false, news));
+                if(mainActivity != null){
+                    if(mainActivity.getBookmarks().containsKey(news.newsId)){
+                        bookmark.setImageResource(R.drawable.ic_bookmark_white_24dp);
+                        bookmark.setOnClickListener(new BookmarkClickListener(true, news));
+                    }
+                    else{
+                        bookmark.setImageResource(R.drawable.ic_bookmark_border_empty_24dp);
+                        bookmark.setOnClickListener(new BookmarkClickListener(false, news));
+                    }
                 }
             }
             else{

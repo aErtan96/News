@@ -258,12 +258,13 @@ public class MainActivity extends AppCompatActivity {
 
         articleFragment.makeLoading();
 
+        boolean isBookMarked = bookmarks.containsKey(articleId);
         JsonArrayRequest singleNewsRequest = new JsonArrayRequest(AppConstants.getSingleNewUrl(articleId),
             response -> {
                 News singleNews = JSONParser.parseSingleNewsResponse(response);
                 if(singleNews != null){
                     articleLoadingIndicator.setVisibility(View.INVISIBLE);
-                    articleFragment.setNewsData(singleNews);
+                    articleFragment.setNewsData(singleNews, isBookMarked);
                 }
                 else{
                     //TODO: O id'ye ait bir kayıt bulunamadı!
@@ -281,6 +282,12 @@ public class MainActivity extends AppCompatActivity {
     public void closeArticleFragment(){
         queue.cancelAll(SINGLE_NEW_REQUEST_TAG);
         fragmentArticleContainer.setVisibility(View.GONE);
+        if(selectedToolbarButton.equals("collections")){
+            ((RecentNewsFragment)fragmentAdapter.getRegisteredFragment(1)).openCollectionsRecycler();
+        }
+        else if(selectedToolbarButton.equals("all_news")){
+            ((RecentNewsFragment)fragmentAdapter.getRegisteredFragment(1)).openRecentNewsRecycler();
+        }
     }
 
     public void openArticleOnWeb(News news) {
@@ -294,6 +301,8 @@ public class MainActivity extends AppCompatActivity {
         FullArticleFragment fullArticleFragment = ((FullArticleFragment) getSupportFragmentManager().findFragmentByTag(AppConstants.FULL_ARTICLE_FRAGMENT_TAG));
         fullArticleFragment.resetWebView();
     }
+
+
 
 
     public LinkedHashMap<Integer, News> getBookmarks(){
@@ -312,6 +321,7 @@ public class MainActivity extends AppCompatActivity {
         SqliteConnector.getInstance(this).deleteBookmark(newsId);
         bookmarks.remove(newsId);
     }
+
 
 
 

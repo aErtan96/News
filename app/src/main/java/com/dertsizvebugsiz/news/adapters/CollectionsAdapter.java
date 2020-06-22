@@ -11,11 +11,13 @@ import com.dertsizvebugsiz.news.AppConstants;
 import com.dertsizvebugsiz.news.R;
 import com.dertsizvebugsiz.news.activities.MainActivity;
 import com.dertsizvebugsiz.news.dataclasses.News;
+
+import java.util.List;
 import java.util.Map;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class CollectionsAdapter extends RecyclerView.Adapter<CollectionsAdapter.CollectionsViewHolder> {
+public class CollectionsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private MainActivity mainActivity;
     private LayoutInflater layoutInflater;
@@ -31,8 +33,10 @@ public class CollectionsAdapter extends RecyclerView.Adapter<CollectionsAdapter.
     }
 
     @Override
-    public void onBindViewHolder(CollectionsViewHolder holder, int position) {
-        holder.setData(((News)((Map.Entry)mainActivity.getBookmarks().entrySet().toArray()[position]).getValue()));
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        //((CollectionsViewHolder)holder).setData(((News)((Map.Entry)mainActivity.getBookmarks().entrySet().toArray()[position]).getValue()));
+        News result = (News) mainActivity.getBookmarks().values().toArray()[position];
+        ((CollectionsViewHolder)holder).setData(result);
     }
 
     @Override
@@ -44,10 +48,10 @@ public class CollectionsAdapter extends RecyclerView.Adapter<CollectionsAdapter.
     class CollectionsViewHolder extends RecyclerView.ViewHolder{
 
         ImageView icon, bookmark;
-        TextView header, datetime;
+        TextView siteName, header, datetime;
         CardView container;
 
-        public CollectionsViewHolder(View itemView) {
+        CollectionsViewHolder(View itemView) {
             super(itemView);
             getViews(itemView);
         }
@@ -55,12 +59,14 @@ public class CollectionsAdapter extends RecyclerView.Adapter<CollectionsAdapter.
         void getViews(View root){
             icon = root.findViewById(R.id.recent_news_item_icon);
             bookmark = root.findViewById(R.id.recent_news_item_bookmark);
+            siteName = root.findViewById(R.id.recent_news_item_site_name);
             header = root.findViewById(R.id.recent_news_item_header);
             container = root.findViewById(R.id.recent_news_recycler_item_container);
             datetime = root.findViewById(R.id.recent_news_item_datetime);
         }
 
-        public void setData(News news){
+        void setData(News news){
+            siteName.setText(news.siteName);
             header.setText(news.title);
             datetime.setText(news.getPublishDatePart());
 
@@ -68,12 +74,13 @@ public class CollectionsAdapter extends RecyclerView.Adapter<CollectionsAdapter.
                     .load(AppConstants.getSiteImageUrl(news.siteId))
                     .into(icon);
 
+            boolean isBookMarked = mainActivity.getBookmarks().containsKey(news.newsId);
 
             container.setOnClickListener(v -> {
                 mainActivity.openArticleFragment(news.newsId);
             });
             if(mainActivity != null){
-                if(mainActivity.getBookmarks().containsKey(news.newsId)){
+                if(isBookMarked){
                     bookmark.setImageResource(R.drawable.ic_bookmark_white_24dp);
                     bookmark.setOnClickListener(new BookmarkClickListener(true, news));
                 }
@@ -86,6 +93,8 @@ public class CollectionsAdapter extends RecyclerView.Adapter<CollectionsAdapter.
                 Log.e("DEBUG","Main Activity is Null!!!");
             }
         }
+
+
     }
 
     class BookmarkClickListener implements View.OnClickListener{
@@ -100,6 +109,7 @@ public class CollectionsAdapter extends RecyclerView.Adapter<CollectionsAdapter.
 
         @Override
         public void onClick(View v) {
+            notifyDataSetChanged();
             if(isBookmarked){
                 mainActivity.deleteBookmark(news.newsId);
                 ((ImageView)v).setImageResource(R.drawable.ic_bookmark_border_empty_24dp);

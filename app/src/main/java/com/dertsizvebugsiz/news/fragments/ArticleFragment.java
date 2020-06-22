@@ -64,7 +64,7 @@ public class ArticleFragment extends Fragment {
         articleFeedbackDownVote.setOnClickListener(null);
     }
 
-    public void setNewsData(News news){
+    public void setNewsData(News news, boolean isBookMarked){
         this.news = news;
         articleHeader.setText(news.title);
         if(news.subTitle != null && news.subTitle.length() != 0){
@@ -82,6 +82,13 @@ public class ArticleFragment extends Fragment {
             //Intent viewIntent = new Intent("android.intent.action.VIEW", Uri.parse(news.link));
             //startActivity(viewIntent);
         });
+        if(isBookMarked){
+            articleBookmark.setImageResource(R.drawable.ic_bookmark_white_24dp);
+        }
+        else{
+            articleBookmark.setImageResource(R.drawable.ic_bookmark_border_empty_24dp);
+        }
+        articleBookmark.setOnClickListener(new BookmarkClickListener(news, isBookMarked));
         changeFeedbackStatus(SqliteConnector.getInstance(getActivity()).getVoteOfNews(news.newsId));
     }
 
@@ -128,6 +135,30 @@ public class ArticleFragment extends Fragment {
             if(getActivity() != null){
                 ((MainActivity)getActivity()).newsFeedbackSent(news.newsId, vote);
             }
+        }
+    }
+
+    private class BookmarkClickListener implements View.OnClickListener{
+
+        boolean isBookMarked;
+        News news;
+
+        BookmarkClickListener(News news, boolean isBookMarked){
+            this.news = news;
+            this.isBookMarked = isBookMarked;
+        }
+
+        @Override
+        public void onClick(View v) {
+            if(isBookMarked){
+                ((MainActivity)getActivity()).deleteBookmark(news.newsId);
+                articleBookmark.setImageResource(R.drawable.ic_bookmark_border_empty_24dp);
+            }
+            else{
+                ((MainActivity)getActivity()).addBookmark(news);
+                articleBookmark.setImageResource(R.drawable.ic_bookmark_white_24dp);
+            }
+            articleBookmark.setOnClickListener(new BookmarkClickListener(news, !isBookMarked));
         }
     }
 
