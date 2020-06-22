@@ -24,6 +24,7 @@ public class AppConstants {
 
 
     public final static String ARTICLE_FRAGMENT_TAG = "article_fragment";
+    public final static String FULL_ARTICLE_FRAGMENT_TAG = "full_article_fragment";
 
     public static String getSingleNewUrl(int newsId){
         return SINGLE_NEW_URL + "id=" + newsId;

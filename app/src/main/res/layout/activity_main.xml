@@ -79,6 +79,20 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/full_article_fragment_container"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <fragment
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:tag="full_article_fragment"
+            android:name="com.dertsizvebugsiz.news.fragments.FullArticleFragment"
+            android:id="@+id/fragment_full_article"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 

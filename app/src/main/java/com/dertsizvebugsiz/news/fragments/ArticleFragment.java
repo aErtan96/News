@@ -75,12 +75,12 @@ public class ArticleFragment extends Fragment {
         }
         articleDate.setText(news.getPublishDatePart());
         articleOpenInNew.setOnClickListener(v -> {
-            Intent viewIntent = new Intent("android.intent.action.VIEW", Uri.parse(news.link));
-            startActivity(viewIntent);
+            ((MainActivity)getActivity()).openArticleOnWeb(news);
         });
         articleReadFull.setOnClickListener(v -> {
-            Intent viewIntent = new Intent("android.intent.action.VIEW", Uri.parse(news.link));
-            startActivity(viewIntent);
+            ((MainActivity)getActivity()).openArticleOnWeb(news);
+            //Intent viewIntent = new Intent("android.intent.action.VIEW", Uri.parse(news.link));
+            //startActivity(viewIntent);
         });
         changeFeedbackStatus(SqliteConnector.getInstance(getActivity()).getVoteOfNews(news.newsId));
     }

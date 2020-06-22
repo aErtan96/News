@@ -64,6 +64,8 @@ public class JSONParser {
             news.subTitle = newsJsonObject.getString("sub_title");
             news.publishDateStr = newsJsonObject.getString("publish_date");
             news.link = newsJsonObject.getString("link");
+            news.siteId = newsJsonObject.getInt("site_id");
+            news.siteName = newsJsonObject.getString("name");
             return news;
         }
         catch (Exception e){

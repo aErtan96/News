@@ -33,6 +33,7 @@ import com.dertsizvebugsiz.news.dataclasses.Site;
 import com.dertsizvebugsiz.news.enums.Vote;
 import com.dertsizvebugsiz.news.fragments.ArticleFragment;
 import com.dertsizvebugsiz.news.fragments.CurrenciesFragment;
+import com.dertsizvebugsiz.news.fragments.FullArticleFragment;
 import com.dertsizvebugsiz.news.fragments.RecentNewsFragment;
 import com.dertsizvebugsiz.news.fragments.SettingsFragment;
 import com.dertsizvebugsiz.news.parser.JSONParser;
@@ -45,6 +46,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import static com.dertsizvebugsiz.news.AppConstants.COINS_API_URL;
 import static com.dertsizvebugsiz.news.AppConstants.CURRENCY_REQUEST_TAG;
+import static com.dertsizvebugsiz.news.AppConstants.FULL_ARTICLE_FRAGMENT_TAG;
 import static com.dertsizvebugsiz.news.AppConstants.LAST_UPLOADED_NEWS_REQUEST_TAG;
 import static com.dertsizvebugsiz.news.AppConstants.NEWS_FEED_REQUEST_TAG;
 import static com.dertsizvebugsiz.news.AppConstants.SINGLE_NEW_REQUEST_TAG;
@@ -66,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
     private News lastPulledNews = null;
 
     private ConstraintLayout fragmentArticleContainer;
+    private ConstraintLayout fragmentFullArticleContainer;
     private ConstraintLayout articleLoadingIndicator;
 
     private MenuItem collectionsButton, allNewsButton;
@@ -73,13 +76,11 @@ public class MainActivity extends AppCompatActivity {
 
     private int unreadNewsCountCheckerRunInterval = 5000;
 
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        fragmentArticleContainer = findViewById(R.id.article_fragment_container);
-        articleLoadingIndicator = findViewById(R.id.article_loading);
+        getViews();
 
         createBottomTabBarAndViewPager();
         setUpToolbar();
@@ -88,8 +89,17 @@ public class MainActivity extends AppCompatActivity {
         startCheckingUnreadNewsCount();
     }
 
-    @Override
     public void onBackPressed() {
+        if(fragmentFullArticleContainer.getVisibility() == View.VISIBLE){
+            FullArticleFragment fullArticleFragment = ((FullArticleFragment) getSupportFragmentManager().findFragmentByTag(AppConstants.FULL_ARTICLE_FRAGMENT_TAG));
+            if (fullArticleFragment.canGoBack()) {
+
+            }
+            else{
+                closeFullArticleFragment();
+            }
+            return;
+        }
         if(fragmentArticleContainer.getVisibility() == View.VISIBLE){
             closeArticleFragment();
         }
@@ -98,7 +108,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
         collectionsButton = menu.findItem(R.id.toolbar_collections_button);
@@ -106,7 +115,6 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
             case R.id.toolbar_collections_button:
@@ -129,6 +137,13 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
         return true;
+    }
+
+
+    void getViews(){
+        fragmentArticleContainer = findViewById(R.id.article_fragment_container);
+        fragmentFullArticleContainer = findViewById(R.id.full_article_fragment_container);
+        articleLoadingIndicator = findViewById(R.id.article_loading);
     }
 
     public void setUpToolbar(){
@@ -259,7 +274,17 @@ public class MainActivity extends AppCompatActivity {
         fragmentArticleContainer.setVisibility(View.GONE);
     }
 
+    public void openArticleOnWeb(News news) {
+        fragmentFullArticleContainer.setVisibility(View.VISIBLE);
+        FullArticleFragment fullArticleFragment = ((FullArticleFragment) getSupportFragmentManager().findFragmentByTag(AppConstants.FULL_ARTICLE_FRAGMENT_TAG));
+        fullArticleFragment.setNewsAndOpen(news);
+    }
 
+    public void closeFullArticleFragment(){
+        fragmentFullArticleContainer.setVisibility(View.GONE);
+        FullArticleFragment fullArticleFragment = ((FullArticleFragment) getSupportFragmentManager().findFragmentByTag(AppConstants.FULL_ARTICLE_FRAGMENT_TAG));
+        fullArticleFragment.resetWebView();
+    }
 
 
     public LinkedHashMap<Integer, News> getBookmarks(){
