@@ -9,6 +9,8 @@ import android.widget.TextView;
 import com.dertsizvebugsiz.news.R;
 import com.dertsizvebugsiz.news.activities.MainActivity;
 import com.dertsizvebugsiz.news.dataclasses.Currency;
+import com.dertsizvebugsiz.news.utils.Formatter;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
@@ -63,12 +65,15 @@ public class CurrenciesAdapter extends RecyclerView.Adapter<CurrenciesAdapter.Cu
 
         public void setData(Currency currency){
             nameTv.setText(currency.name);
+            /*
             if(currency.price < 1){
-                priceTv.setText("$" + formatter_decimal_7.format(currency.price));
+                priceTv.setText(("$" + formatter_decimal_7.format(currency.price)).replace('.',','));
             }
             else{
                 priceTv.setText(("$" + formatSignificant(currency.price, 8)).replace('.',','));
             }
+            */
+            priceTv.setText(Formatter.formatCurrencyValue(currency.price));
             symbolTv.setText(currency.symbol);
 
             String priceChangeStr = formatter_decimal_2.format(currency.dailyChangePercent) + "%";
@@ -91,7 +96,6 @@ public class CurrenciesAdapter extends RecyclerView.Adapter<CurrenciesAdapter.Cu
             BigDecimal bigDecimal = new BigDecimal(value, mathContext);
             return bigDecimal.toPlainString();
         }
-
     }
 
 }

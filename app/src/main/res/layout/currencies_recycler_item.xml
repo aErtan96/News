@@ -56,7 +56,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#19DA19"
@@ -68,10 +67,12 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginStart="8dp"
-            android:layout_width="wrap_content"
+            android:layout_width="110dp"
+            android:maxLines="1"
+            android:gravity="right"
             android:layout_height="wrap_content"
             android:textSize="18sp"
-            android:text="$7012.42"/>
+            android:text="$0.05328989"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
