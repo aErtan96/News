@@ -7,7 +7,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/fragment_currencies_top_bar"
         android:layout_width="match_parent"
-        android:background="@color/colorPrimary"
+        android:background="@color/colorPrimaryLight"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_height="50dp">
 

@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.toolbar_collections_button:
                 if(selectedToolbarButton.equals("collections")){
@@ -138,7 +138,6 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
     }
-
 
     void getViews(){
         fragmentArticleContainer = findViewById(R.id.article_fragment_container);
@@ -173,12 +172,15 @@ public class MainActivity extends AppCompatActivity {
                 switch (position){
                     case 0:
                         changeTitle("Currencies");
+                        setActionBarButtonsVisibility(false);
                         break;
                     case 1:
                         changeTitle("News Feed");
+                        setActionBarButtonsVisibility(true);
                         break;
                     case 2:
                         changeTitle("Sources");
+                        setActionBarButtonsVisibility(false);
                         break;
                 }
             }
@@ -233,6 +235,13 @@ public class MainActivity extends AppCompatActivity {
 
         navigationTabBar.setViewPager(viewPager);
 
+    }
+
+    public void setActionBarButtonsVisibility(boolean isVisible){
+        if(collectionsButton != null && allNewsButton != null){
+            collectionsButton.setVisible(isVisible);
+            allNewsButton.setVisible(isVisible);
+        }
     }
 
     public void changeTitle(String title){
