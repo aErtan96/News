@@ -1,6 +1,5 @@
 package com.dertsizvebugsiz.news.activities;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -75,6 +74,8 @@ public class MainActivity extends AppCompatActivity {
     private String selectedToolbarButton = "all_news";
 
     private int unreadNewsCountCheckerRunInterval = 5000;
+
+    public boolean disabledSitesHaveChanged = false;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -177,6 +178,11 @@ public class MainActivity extends AppCompatActivity {
                     case 1:
                         changeTitle("News Feed");
                         setActionBarButtonsVisibility(true);
+                        if(disabledSitesHaveChanged){
+                            RecentNewsFragment recentNewsFragment = ((RecentNewsFragment)fragmentAdapter.getRegisteredFragment(1));
+                            recentNewsFragment.recentNewsAdapter.removeDisabledSiteNews();
+                            disabledSitesHaveChanged = false;
+                        }
                         break;
                     case 2:
                         changeTitle("Sources");
@@ -250,6 +256,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+
     public void openArticleFragment(int articleId){
         Log.d("DEBUG", "Open Article Id: " + articleId);
         fragmentArticleContainer.setVisibility(View.VISIBLE);
@@ -301,6 +308,7 @@ public class MainActivity extends AppCompatActivity {
         FullArticleFragment fullArticleFragment = ((FullArticleFragment) getSupportFragmentManager().findFragmentByTag(AppConstants.FULL_ARTICLE_FRAGMENT_TAG));
         fullArticleFragment.resetWebView();
     }
+
 
 
 

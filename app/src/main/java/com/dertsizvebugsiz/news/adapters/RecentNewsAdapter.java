@@ -9,9 +9,17 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.dertsizvebugsiz.news.AppConstants;
 import com.dertsizvebugsiz.news.R;
+import com.dertsizvebugsiz.news.SqliteConnector;
 import com.dertsizvebugsiz.news.activities.MainActivity;
 import com.dertsizvebugsiz.news.dataclasses.News;
+import com.dertsizvebugsiz.news.dataclasses.Site;
+
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -76,6 +84,22 @@ public class RecentNewsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             return news.size() + 1;
         else
             return news.size() + 2;
+    }
+
+    public void removeDisabledSiteNews(){
+        LinkedHashMap<Integer, Site> sites = SqliteConnector.getInstance(mainActivity).getAllSitesList();
+        LinkedHashMap<Integer, Site> disabledSites = new LinkedHashMap<>();
+        for(LinkedHashMap.Entry<Integer, Site> entry : sites.entrySet()){
+            if(!entry.getValue().isEnabled){
+                disabledSites.put(entry.getValue().siteId, entry.getValue());
+            }
+        }
+        for(int i = news.size() - 1; i >= 0; i--){
+            if(disabledSites.containsKey(news.get(i).siteId)){
+                news.remove(i);
+            }
+        }
+        notifyDataSetChanged();
     }
 
     public class RecentNewsViewHolder extends RecyclerView.ViewHolder{

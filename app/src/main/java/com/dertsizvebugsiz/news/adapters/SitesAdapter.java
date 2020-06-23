@@ -21,7 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class SitesAdapter extends RecyclerView.Adapter<SitesAdapter.SitesViewHolder> {
 
-    public MainActivity mainActivity;
+    MainActivity mainActivity;
     private LayoutInflater layoutInflater;
     private LinkedHashMap<Integer, Site> sites;
     private List<Integer> siteKeys;
@@ -87,6 +87,7 @@ public class SitesAdapter extends RecyclerView.Adapter<SitesAdapter.SitesViewHol
                 switchCompat.setChecked(site.isEnabled);
             switchCompat.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 if(mainActivity != null){
+                    mainActivity.disabledSitesHaveChanged = true;
                     this.site.isEnabled = buttonView.isChecked();
                     if(buttonView.isChecked()){
                         SqliteConnector.getInstance(mainActivity).setSiteEnabled(this.site.siteId);

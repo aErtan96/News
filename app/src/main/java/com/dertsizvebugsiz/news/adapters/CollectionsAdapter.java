@@ -11,9 +11,6 @@ import com.dertsizvebugsiz.news.AppConstants;
 import com.dertsizvebugsiz.news.R;
 import com.dertsizvebugsiz.news.activities.MainActivity;
 import com.dertsizvebugsiz.news.dataclasses.News;
-
-import java.util.List;
-import java.util.Map;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -93,8 +90,6 @@ public class CollectionsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 Log.e("DEBUG","Main Activity is Null!!!");
             }
         }
-
-
     }
 
     class BookmarkClickListener implements View.OnClickListener{
